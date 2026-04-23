@@ -1,0 +1,47 @@
+{
+  "name": "landing-page-copa-caribe-backend",
+  "version": "1.0.0",
+  "description": "landing page for an academia",
+  "main": "app.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "start": "node dist/App/app.js",
+    "dev": "nodemon --exec \"node --loader ts-node/esm\" src/App/app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/G-dark/landing-page-copa-caribe-backend.git"
+  },
+  "keywords": [
+    "landing",
+    "page"
+  ],
+  "author": "Edison Pacheco",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/G-dark/landing-page-copa-caribe-backend/issues"
+  },
+  "homepage": "https://github.com/G-dark/landing-page-copa-caribe-backend#readme",
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.23.0",
+    "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
