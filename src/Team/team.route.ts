@@ -35,6 +35,7 @@ const getTeamsHandlerQuery: any = async (req: Request, res: Response) => {
   if (category) {
     query.category = category;
   }
+  
   const result = await getTeamsController(undefined, query);
   const statusCode = typeof result == "string" ? 500 : 200;
   return res.status(statusCode).json(result);
