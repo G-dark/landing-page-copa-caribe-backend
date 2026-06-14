@@ -10,6 +10,7 @@ export type SignedPeopleType = {
   multiplesCat: boolean;
   oneCat: boolean;
   date: Date;
+  cargo: string;
   fase?: "Inscrito" | "Contactado" | "Pendiente a pago" | "Aceptado";
 };
 
@@ -28,6 +29,7 @@ const SignedPeopleSchema = new mongoose.Schema<SignedPeopleType>({
     enum: ["Inscrito", "Contactado", "Pendiente a pago", "Aceptado"],
     default: "Inscrito",
   },
+  cargo: {type: String}
 });
 
 export const SignedPeople = mongoose.model<SignedPeopleType>(

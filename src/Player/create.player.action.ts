@@ -2,7 +2,7 @@ import Player from "./player.model.js";
 import { PlayerType } from "./player.model.js";
 import Team from "../Team/team.model.js";
 
-export const registerAPlayer = async (player: PlayerType) => {
+export const registerAPlayer = async (player: PlayerType, username:string) => {
   const existingPlayer = await Player.find({
     id: player.id,
     editionPlayed: player.editionPlayed,
@@ -17,6 +17,8 @@ export const registerAPlayer = async (player: PlayerType) => {
       const newPlayer = new Player(player);
       registered = await newPlayer.save();
       team[0].players?.push(Number(player.id));
+      team[0].editedAt = new Date(Date.now());
+      team[0].editedBy = username
       const updatedTeam = await Team.updateOne({ id: team[0].id }, team[0]);
     } else {
       return {error: "That team doesn't exist"}

@@ -10,6 +10,8 @@ import {
 import { authMiddleware, AuthRequest } from "../Middlewares/auth.middleware.js";
 import { PlayerType } from "./player.model.js";
 import { uploadImage } from "../Middlewares/storage.middleware.js";
+import { getTeamsController, updateTeamController } from "../Team/team.controller.js";
+import { teamType } from "../Team/team.model.js";
 
 const playerRouter = Router();
 
@@ -94,8 +96,8 @@ const createPlayerHandler: any = async (
     editionPlayed,
     age,
     birthYear,
+    talla
   } = request.body;
-  console.log(id, name);
   const player: PlayerType = {
     id,
     name,
@@ -107,8 +109,8 @@ const createPlayerHandler: any = async (
     editionPlayed,
     age: Number(age),
     birthYear: new Date(birthYear),
-    image: " ",
-    image_id: " ",
+    image: null,
+    image_id: null,
     goals: 0,
     assists: 0,
     gamesPlayed: 0,
@@ -117,12 +119,22 @@ const createPlayerHandler: any = async (
     minutesPlayed: 0,
     yellowCards: 0,
     redCards: 0,
+    talla,
+    editedAt:null,
+    editedBy: null,
   };
   if (
     request.user?.rol == "Admin" ||
     request.user?.team.includes(player.team)
   ) {
-    const result = await makePlayerController(player, request.file);
+    const team = await getTeamsController(player.team);
+    const teamParsed = team as any[] as teamType[];
+    if(teamParsed.length > 0){
+      teamParsed[0].editedAt = new Date(Date.now());
+      teamParsed[0].editedBy = request.user!.username;
+      await updateTeamController(player.team, teamParsed[0] as teamType);
+    }
+    const result = await makePlayerController(player, request.user?.username, request.file);
     const statusCode = result.success ? 200 : 500;
     return response.status(statusCode).json(result);
   } else {
@@ -155,6 +167,7 @@ const updatePlayerHandler: any = async (
     minutesPlayed,
     starterGames,
     subInGames,
+    talla
   } = request.body;
   let player: PlayerType = {
     id,
@@ -176,6 +189,10 @@ const updatePlayerHandler: any = async (
     minutesPlayed,
     starterGames,
     subInGames,
+    talla,
+    editedAt: new Date(Date.now()),
+    editedBy:request.user!.username
+
   };
   if (
     request.user?.rol == "Admin" ||
@@ -198,7 +215,7 @@ const deletePlayerHandler: any = async (
   request: AuthRequest,
   response: Response,
 ) => {
-  console.log("Entró 2");
+
   const { id, editionPlayed } = request.params;
   const player = await getPlayersController(id as string, undefined);
 
@@ -209,6 +226,7 @@ const deletePlayerHandler: any = async (
     const result = await deletePlayerController(
       id as string,
       editionPlayed as string,
+      request.user?.username
     );
     const statusCode = result.success ? 200 : 500;
     return response.status(statusCode).json(result);

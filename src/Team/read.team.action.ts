@@ -5,7 +5,8 @@ export const readTeams = async (id?: string, query?: any) => {
   if (id) {
     teams = await Team.find({ id });
   } else {
-    teams = await Team.find(query).exec();
+    const {name, ...restQuery} = query;
+    teams = await Team.find({name: {$regex: name, $options: "i"}, ...restQuery}).exec();
   }
   if (!id && !query) {
     teams = await Team.find();
@@ -31,6 +32,8 @@ export const transform2Team = (team: any): teamType => {
     players: team.players,
     category: team.category,
     edition: team.edition,
+    editedBy: team.editedBy,
+    editedAt: team.editedAt
   };
 };
 

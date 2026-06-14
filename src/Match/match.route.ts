@@ -21,7 +21,10 @@ import { evento, matchType } from "./match.model.js";
 
 const matchRouter = Router();
 
-const readMatchHandlerByID: any = async (req: Request, res: Response) => {
+const readMatchHandlerByIDHandler: any = async (
+  req: Request,
+  res: Response,
+) => {
   const { id } = req.params;
   const result = await readMatchController(id as string);
   const statusCode = typeof result == "string" ? 500 : 200;
@@ -30,6 +33,21 @@ const readMatchHandlerByID: any = async (req: Request, res: Response) => {
 
 const readMatchHandler: any = async (req: Request, res: Response) => {
   const result = await readMatchController();
+  const statusCode = typeof result == "string" ? 500 : 200;
+  return res.status(statusCode).json(result);
+};
+
+const readMatchByQueryHandler: any = async (req: Request, res: Response) => {
+  const { teamA, teamB } = req.query;
+  let query: any = {};
+  if (teamA) {
+    query.teamA = teamA;
+  }
+  if (teamB) {
+    query.teamB = teamB;
+  }
+
+  const result = await readMatchController(undefined, query);
   const statusCode = typeof result == "string" ? 500 : 200;
   return res.status(statusCode).json(result);
 };
@@ -47,12 +65,27 @@ const createMatchHandler: any = async (req: AuthRequest, res: Response) => {
   }
 };
 
-const skipTypes = ["Final", "Start", "Anulation"]; // constant for skip the team depending on type
+const skipTypes = [
+  "Final",
+  "Start",
+  "Anulation",
+  "Positions",
+  "RestTime",
+  "Start2",
+  "Penales"
+]; // constant for skip the team depending on type
 
 const updateMatchHandler: any = async (req: AuthRequest, res: Response) => {
-  if (req.user?.rol == "Admin") {
-    const { match } = req.body;
-    const { id } = req.params;
+  const { match } = req.body;
+  const { id } = req.params;
+  const matchR = await readMatchController(id as string);
+  const matchRParsed = matchR as any[] as matchType[];
+
+  if (
+    req.user?.rol == "Admin" ||
+    req.user?.team.includes(matchRParsed[0].teamA) ||
+    req.user?.team.includes(matchRParsed[0].teamB)
+  ) {
     const result = await updateMatchController(id as string, match);
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
@@ -85,13 +118,17 @@ const addEventHandler: any = async (req: AuthRequest, res: Response) => {
       // get the match which we're creating an event
       const match = await readMatchController(id as string);
       const matchReal = transform2Match((match as matchType[])[0]);
-      let lastEvent: any, playersRelated;
+      let lastEvent: any, playersRelated, penultime: any;
       let action: "Delete" | "Update";
 
       //Anulate in case of anulation
       if (event.tipo == "Anulation") {
         action = "Delete";
         lastEvent = matchReal.eventos[matchReal.eventos.length - 2];
+        if (lastEvent.tipo == "Goal"){
+          // assist is the penultimate event when a gol is anulled
+          penultime = matchReal.eventos[matchReal.eventos.length - 3];
+        }
         const complement2 = skipTypes.some((st) => {
           return st == lastEvent.tipo;
         })
@@ -104,6 +141,7 @@ const addEventHandler: any = async (req: AuthRequest, res: Response) => {
         action = "Update";
       }
       if (!typo.includes("Substitution")) {
+        console.log("playersRelated", playersRelated, typo, action);
         for (let player of playersRelated) {
           const change = await ChangeStatsBOEventController(
             id as string,
@@ -112,6 +150,17 @@ const addEventHandler: any = async (req: AuthRequest, res: Response) => {
             event.minute,
             player,
           );
+        }
+        if(event.tipo == "Anulation" && lastEvent.tipo == "Goal" && penultime.tipo == "Assist"){
+          for (let player of penultime.playersRelated) {
+            const change = await ChangeStatsBOEventController(
+              id as string,
+              "Assist" + penultime.team,
+              "Delete",
+              penultime.minute,
+              player,
+            );
+          }
         }
       } else {
         for (let i = 0; i < playersRelated.length; i += 2) {
@@ -127,15 +176,20 @@ const addEventHandler: any = async (req: AuthRequest, res: Response) => {
       }
 
       if (
-        (typo.includes("Corner")) && playersRelated.length == 0
+        typo.includes("Corner") ||
+        typo.includes("Fault") ||
+        typo.includes("Comment") ||
+        typo.includes("Positions") ||
+        typo.includes("RestTime") ||
+        typo.includes("Penales") ||
+        typo.includes("Start2") && playersRelated.length == 0
       ) {
-
         const change = await ChangeStatsBOEventController(
-            id as string,
-            typo,
-            action,
-            event.minute
-          );
+          id as string,
+          typo,
+          action,
+          event.minute,
+        );
       }
     }
     const statusCode = result.success ? 200 : 500;
@@ -180,14 +234,23 @@ const deleteEventHandler: any = async (req: AuthRequest, res: Response) => {
         ? ""
         : evento.team;
       const typo = evento.tipo + complement;
-      for (let player of evento.playersRelated) {
+      if (evento.playersRelated.length > 0) {
+        for (let player of evento.playersRelated) {
+          const change = await ChangeStatsBOEventController(
+            id as string,
+            typo,
+            "Delete",
+            "1",
+            player,
+          );
+        }
+      } else {
         const change = await ChangeStatsBOEventController(
-          id as string,
-          typo,
-          "Delete",
-          "1",
-          player,
-        );
+            id as string,
+            typo,
+            "Delete",
+            evento.minute
+          );
       }
     }
 
@@ -261,12 +324,12 @@ const addPenaltyHandler: any = async (req: AuthRequest, res: Response) => {
 };
 const editPenaltyHandler: any = async (req: AuthRequest, res: Response) => {
   if (req.user?.rol == "Admin") {
-    const { id, penaltyIndex } = req.params;
+    const { id, penaltyID } = req.params;
     const { penalty } = req.body;
     const result = await editPenaltyController(
       id as string,
       penalty,
-      Number(penaltyIndex),
+      penaltyID as string,
     );
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
@@ -276,10 +339,10 @@ const editPenaltyHandler: any = async (req: AuthRequest, res: Response) => {
 };
 const deletePenaltyHandler: any = async (req: AuthRequest, res: Response) => {
   if (req.user?.rol == "Admin") {
-    const { id, penaltyIndex } = req.params;
+    const { id, penaltyID } = req.params;
     const result = await deletePenaltyController(
       id as string,
-      Number(penaltyIndex),
+      penaltyID as string,
     );
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
@@ -288,43 +351,59 @@ const deletePenaltyHandler: any = async (req: AuthRequest, res: Response) => {
   }
 };
 
-matchRouter.get("/API/match/:id", readMatchHandlerByID);
+matchRouter.get("/API/match/:id", readMatchHandlerByIDHandler);
 matchRouter.get("/API/match", readMatchHandler);
 matchRouter.post("/API/match/create", authMiddleware, createMatchHandler);
 matchRouter.delete("/API/match/delete/:id", authMiddleware, deleteMatchHandler);
 matchRouter.patch("/API/match/update/:id", authMiddleware, updateMatchHandler);
 matchRouter.patch(
-  "/API/match/update/addEvent/:id",
+  "/API/match/addEvent/:id",
   authMiddleware,
   express.json(),
   addEventHandler,
 );
 matchRouter.patch(
-  "/API/match/update/editEvent/:id/:idEvent",
+  "/API/match/editEvent/:id/:idEvent",
   authMiddleware,
   express.json(),
   editEventHandler,
 );
 matchRouter.patch(
-  "/API/match/update/deleteEvent/:id/:idEvent",
+  "/API/match/deleteEvent/:id/:idEvent",
   authMiddleware,
   deleteEventHandler,
 );
 
 matchRouter.patch(
-  "/API/match/update/addReferee/:id",
+  "/API/match/addReferee/:id",
   authMiddleware,
   addRefereeHandler,
 );
 matchRouter.patch(
-  "/API/match/update/editReferee/:id/:refereeID",
+  "/API/match/editReferee/:id/:refereeID",
   authMiddleware,
   editRefereeHandler,
 );
 matchRouter.patch(
-  "/API/match/update/deleteReferee/:id/:refereeID",
+  "/API/match/deleteReferee/:id/:refereeID",
   authMiddleware,
   deleteRefereeHandler,
 );
+matchRouter.patch(
+  "/API/match/addPenalty/:id",
+  authMiddleware,
+  addPenaltyHandler,
+);
+matchRouter.patch(
+  "/API/match/editPenalty/:id/:penaltyID",
+  authMiddleware,
+  editPenaltyHandler,
+);
+matchRouter.patch(
+  "/API/match/deletePenalty/:id/:penaltyID",
+  authMiddleware,
+  deletePenaltyHandler,
+);
+
 
 export default matchRouter;

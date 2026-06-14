@@ -13,16 +13,4 @@ export function randomChoice(array: any[]) {
   return choice;
 }
 
-export function fact(n: number) {
-  let p = 1;
-  while (n > 1) {
-    p *= n;
-    --n;
-  }
-  return p;
-}
-
-export function combinatoria(n: number, x: number) {
-  return fact(n) / (fact(x) * fact(n - x));
-}
 

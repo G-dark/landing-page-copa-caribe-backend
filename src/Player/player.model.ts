@@ -4,12 +4,12 @@ export type PlayerType = {
   name: string;
   id: string;
   dorsal: number;
-  nation:string;
+  nation: string;
   position: string;
   team: string;
   teamName: string;
-  image: string;
-  image_id?:string;
+  image: string | null;
+  image_id?: string | null;
   goals: number;
   assists: number;
   gamesPlayed: number;
@@ -21,6 +21,9 @@ export type PlayerType = {
   subInGames: number;
   age: number;
   birthYear: Date;
+  talla: string;
+  editedBy: string | null;
+  editedAt: Date| null;
 };
 
 const playerSchema = new mongoose.Schema<PlayerType>({
@@ -31,8 +34,8 @@ const playerSchema = new mongoose.Schema<PlayerType>({
   position: { type: String, required: true },
   team: { type: String, ref: "Team", required: true },
   teamName: { type: String, required: true },
-  image: { type: String, default: " " },
-  image_id: {type: String},
+  image: { type: String, default: null },
+  image_id: { type: String, default: null },
   goals: { type: Number, default: 0 },
   assists: { type: Number, default: 0 },
   gamesPlayed: { type: Number, default: 0 },
@@ -44,6 +47,9 @@ const playerSchema = new mongoose.Schema<PlayerType>({
   subInGames: { type: Number, default: 0 },
   age: { type: Number, required: true },
   birthYear: { type: Date, required: true },
+  talla: { type: String },
+  editedBy: { type: String },
+  editedAt: { type: Date },
 });
 
 const Player = mongoose.model<PlayerType>("Player", playerSchema);

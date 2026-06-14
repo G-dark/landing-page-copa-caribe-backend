@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
-
+export type penaltyTaker = {
+  player: string;
+  penalty: string | null;
+};
 export type penalty = {
+  id: string;
   player: string;
   goalkeeper: string;
+  team: "A" | "B";
   result: "Goal" | "Fail" | "Saved";
 };
 export type formacion = {
@@ -16,6 +21,7 @@ export type evento = {
   tipo:
     | "Goal"
     | "Penalty Goal"
+    | "Penalty Missed"
     | "Yellow"
     | "Red"
     | "Assist"
@@ -25,7 +31,10 @@ export type evento = {
     | "Corner"
     | "Final"
     | "Start"
-    | "Positions";
+    | "Positions"
+    | "Fault"
+    | "RestTime"
+    | "Penales";
   team: "A" | "B" | "NA";
   playersRelated: string[];
   minute: string;
@@ -52,8 +61,10 @@ export type matchType = {
   scorersB: string[];
   assistersA: string[];
   assistersB: string[];
-  cornersA: number,
-  cornersB: number,
+  cornersA: number;
+  cornersB: number;
+  faultsA: number;
+  faultsB: number;
   yellowPlayersA: string[];
   redPlayersA: string[];
   yellowPlayersB: string[];
@@ -61,15 +72,17 @@ export type matchType = {
   referee: refereeInfo[];
   formacionA?: formacion;
   formacionB?: formacion;
+  finalFormacionA?: formacion;
+  finalFormacionB?: formacion;
   yellowCards: number;
   redCards: number;
   eventos: evento[];
   rules: rules;
-  status?: "Programado" | "En vivo" | "Finalizado";
+  status?: "Programado" | "En vivo" | "Finalizado" | "Entretiempo" | "Penales";
   extraTime?: number;
   extraTime2?: number;
-  penaltyTakersA?: string[];
-  penaltyTakersB?: string[];
+  penaltyTakersA?: penaltyTaker[];
+  penaltyTakersB?: penaltyTaker[];
   penaltyStarter?: "A" | "B" | "NA";
   penalties?: penalty[];
   penaltieResult?: string;
@@ -89,7 +102,7 @@ const matchSchema = new mongoose.Schema<matchType>({
   teamA: { type: String, ref: "TeamA", required: true },
   teamB: { type: String, ref: "TeamB", required: true },
   date: { type: Date, required: true },
-  location: { type: String },
+  location: { type: String, default: "" },
   edition: { type: String, required: true },
   result: { type: String, default: "0-0" },
   scorersA: [{ type: String, default: [] }],
@@ -103,12 +116,22 @@ const matchSchema = new mongoose.Schema<matchType>({
   formacionA: {
     starters: [{ type: String, default: [] }],
     subPlayers: [{ type: String, default: [] }],
-    distribution: { type: String, default:"4-3-3" },
+    distribution: { type: String, default: "4-3-3" },
   },
   formacionB: {
     starters: [{ type: String, default: [] }],
     subPlayers: [{ type: String, default: [] }],
-    distribution: { type: String, default:"4-3-3" },
+    distribution: { type: String, default: "4-3-3" },
+  },
+  finalFormacionA: {
+    starters: [{ type: String, default: [] }],
+    subPlayers: [{ type: String, default: [] }],
+    distribution: { type: String, default: "4-3-3" },
+  },
+  finalFormacionB: {
+    starters: [{ type: String, default: [] }],
+    subPlayers: [{ type: String, default: [] }],
+    distribution: { type: String, default: "4-3-3" },
   },
   yellowCards: { type: Number, default: 0 },
   redCards: { type: Number, default: 0 },
@@ -116,9 +139,8 @@ const matchSchema = new mongoose.Schema<matchType>({
     {
       id: { type: String },
       name: { type: String },
-      lastname: { type: String },
+      lastName: { type: String },
       position: { type: String, enum: ["Central", "Linea", "Cuarto"] },
-      default: [],
     },
   ],
   eventos: [
@@ -130,6 +152,8 @@ const matchSchema = new mongoose.Schema<matchType>({
         type: String,
         enum: [
           "Goal",
+          "Penalty Goal",
+          "Penalty Missed",
           "Assist",
           "Red",
           "Yellow",
@@ -139,7 +163,11 @@ const matchSchema = new mongoose.Schema<matchType>({
           "Corner",
           "Final",
           "Start",
-          "Positions"
+          "Start2",
+          "Positions",
+          "Fault",
+          "RestTime",
+          "Penales",
         ],
         require: true,
       },
@@ -153,19 +181,21 @@ const matchSchema = new mongoose.Schema<matchType>({
   },
   status: {
     type: String,
-    enum: ["Programado", "En vivo", "Finalizado"],
+    enum: ["Programado", "En vivo", "Finalizado", "Entretiempo", "Penales"],
     default: "Programado",
   },
-  extraTime: { type: Number, default:0 },
-  extraTime2: { type: Number, default: 0},
-  penaltyTakersA: [{ type: String, default:[] }],
-  penaltyTakersB: [{ type: String , default:[]}],
+  extraTime: { type: Number, default: 0 },
+  extraTime2: { type: Number, default: 0 },
+  penaltyTakersA: [{ player: { type: String }, penalty: { type: String, default: null } }],
+  penaltyTakersB: [{ player: { type: String }, penalty: { type: String, default: null } }],
   penaltyStarter: { type: String, enum: ["A", "B", "NA"], default: "NA" },
   penalties: [
     {
+      id: { type: String },
       player: { type: String },
       goalkeeper: { type: String },
       result: { type: String, enum: ["Goal", "Fail", "Saved"] },
+      team: { type: String, enum: ["A", "B"] },
     },
   ],
   penaltieResult: { type: String, default: "0-0" },
@@ -183,8 +213,10 @@ const matchSchema = new mongoose.Schema<matchType>({
   },
   order: { type: String },
   nextRound: { type: String },
-  cornersA: {type:Number, default: 0},
-  cornersB: {type:Number, default: 0}
+  cornersA: { type: Number, default: 0 },
+  cornersB: { type: Number, default: 0 },
+  faultsA: { type: Number, default: 0 },
+  faultsB: { type: Number, default: 0 },
 });
 
 const Match = mongoose.model<matchType>("Match", matchSchema);

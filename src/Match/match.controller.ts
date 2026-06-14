@@ -19,10 +19,10 @@ import { v2 as cloudinary } from "cloudinary";
 import { CLOUD_NAME, API_KEY, API_SECRET } from "../App/config.js";
 
 export const readMatchController = async (
-  id?: string,
+  id?: string, query?:any
 ): Promise<matchType[] | { error: String }> => {
   try {
-    return await readMatch(id);
+    return await readMatch(id, query);
   } catch (error) {
     return { error: "Failed to get the match" };
   }
@@ -43,7 +43,7 @@ export const addEventController = async (id: string, evento: evento) => {
   try {
     return await addEvent(evento, id);
   } catch (error) {
-    return { error: String(error) }; // "Failed to add the event"
+    return { error:"Failed to add the event" };
   }
 };
 export const editEventController = async (
@@ -80,7 +80,11 @@ export const deleteMatchController = async (id: string) => {
  * @param {String} id - id del match
  * @param {String} typo - tipo de participacion goal o assistencia y de que equipo
  * @param {String} player - id del jugador a ingresar en la lista
- * @param {String} action - id del jugador a ingresar en la lista
+ * @param {String} action - accion a realizar, eliminar o actualizar
+ * @param {String} minute - minuto del evento
+ * @param {String} player2 - id del jugador a eliminar de la lista en caso de ser una asistencia o una sustitucion
+ * @returns {Object} resultado de la operacion
+ * @throws {Object} error si falla la operacion
 
 */
 export const ChangeStatsBOEventController = async (
@@ -134,22 +138,22 @@ export const addPenaltyController = async (matchID: string, penalty: penalty) =>
   try {
     return await addPenalty(matchID, penalty);
   } catch (error) {
-    return { error: "failed to add the penalty" };
+    return { error: String(error) }; // "failed to add the penalty"
   }
 };
 
-export const editPenaltyController = async (matchID: string, penalty: penalty, penaltyIndex: number) => {
+export const editPenaltyController = async (matchID: string, penalty: penalty, penaltyID: string) => {
   try {
-    return await editPenalty(matchID, penalty, penaltyIndex);
+    return await editPenalty(matchID, penalty, penaltyID);
   } catch (error) {
     return { error: "failed to edit the penalty" };
   }
 };
 
-export const deletePenaltyController = async (matchID: string, penaltyIndex: number) => {
+export const deletePenaltyController = async (matchID: string, penaltyID: string) => {
   try {
-    return await deletePenalty(matchID, penaltyIndex);
+    return await deletePenalty(matchID, penaltyID);
   } catch (error) {
-    return { error: "failed to delete the penalty" };
+    return { error: String(error) }; //"failed to delete the penalty"
   }
 };
