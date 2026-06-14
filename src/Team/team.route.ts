@@ -11,6 +11,7 @@ import {
 import { AuthRequest, authMiddleware } from "../Middlewares/auth.middleware.js";
 import { uploadImage } from "../Middlewares/storage.middleware.js";
 import { coachInfo, teamType } from "./team.model.js";
+import { deletePlayerController } from "../Player/player.controller.js";
 const teamRouter = Router();
 
 const getTeamsHandlerID: any = async (req: Request, res: Response) => {
@@ -35,7 +36,7 @@ const getTeamsHandlerQuery: any = async (req: Request, res: Response) => {
   if (category) {
     query.category = category;
   }
-  
+
   const result = await getTeamsController(undefined, query);
   const statusCode = typeof result == "string" ? 500 : 200;
   return res.status(statusCode).json(result);
@@ -57,6 +58,8 @@ const createTeamHandler: any = async (req: AuthRequest, res: Response) => {
     country,
     founded,
     category,
+    editedAt: null,
+    editedBy: null,
   };
   const date = new Date(team.founded);
   team.founded = date;
@@ -72,6 +75,12 @@ const createTeamHandler: any = async (req: AuthRequest, res: Response) => {
 const deleteTeamHandler: any = async (req: AuthRequest, res: Response) => {
   const { id, username } = req.params;
   if (req.user?.rol == "Admin" || req.user?.team.includes(id as string)) {
+    const team = await getTeamsController(id as string, undefined) as teamType[]
+    // delete coach and players simultaneously
+    for(let player of team[0].players!){
+      await deletePlayerController(player.toString(), team[0].edition, req.user.username);
+    }
+
     const result = await deleteTeamController(id as string, username as string);
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
@@ -82,19 +91,21 @@ const deleteTeamHandler: any = async (req: AuthRequest, res: Response) => {
 
 const updateTeamHandler: any = async (req: AuthRequest, res: Response) => {
   const { name, edition, country, founded, category } = req.body;
-  const team: teamType = {
+
+  const { ide, username } = req.params;
+    const team: teamType = {
     name,
     edition,
     country,
     founded,
     category,
+    editedBy:username as string,
+    editedAt: new Date(Date.now())
   };
-  const { ide, username } = req.params;
   if (req.user?.team.includes(ide as string) || req.user?.rol == "Admin") {
     const result = await updateTeamController(
       ide as string,
       team,
-      username as string,
       req.file,
     );
     const statusCode = result.success ? 200 : 500;
@@ -110,7 +121,7 @@ const addCoachHandler: any = async (req: AuthRequest, res: Response) => {
   const coach: coachInfo = { id, name };
   const { ide } = req.params;
   if (req.user?.team.includes(ide as string) || req.user?.rol == "Admin") {
-    const result = await addCoachController(ide as string, coach, req.file);
+    const result = await addCoachController(ide as string, coach, req.user!.username, req.file);
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
   } else {
@@ -121,7 +132,7 @@ const addCoachHandler: any = async (req: AuthRequest, res: Response) => {
 const deleteCoachHandler: any = async (req: AuthRequest, res: Response) => {
   const { id, idCoach } = req.params;
   if (req.user?.team.includes(id as string) || req.user?.rol == "Admin") {
-    const result = await deleteCoachController(id as string, idCoach as string);
+    const result = await deleteCoachController(id as string, idCoach as string, req.user!.username);
     let statusCode;
     if ("success" in result!) {
       statusCode = 200;
@@ -144,6 +155,7 @@ const updateCoachHandler: any = async (req: AuthRequest, res: Response) => {
       ide as string,
       coach,
       idCoach as string,
+      req.user!.username,
       req.file,
     );
     const statusCode = result.success ? 200 : 500;
@@ -152,7 +164,6 @@ const updateCoachHandler: any = async (req: AuthRequest, res: Response) => {
     return res.status(403).json({ error: "Not permissions" });
   }
 };
-
 
 teamRouter.get("/API/team/:id", getTeamsHandlerID);
 teamRouter.get("/API/teams/query", getTeamsHandlerQuery);

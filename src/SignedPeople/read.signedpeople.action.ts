@@ -59,5 +59,6 @@ export const transform2Signed = (signed: any): SignedPeopleType => {
     multiplesCat: signed.multipleCat,
     date: signed.date,
     fase: signed.fase,
+    cargo:signed.cargo
   };
 };

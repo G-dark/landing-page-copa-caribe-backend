@@ -32,6 +32,8 @@ export const transform2Team = (team: any): teamType => {
     players: team.players,
     category: team.category,
     edition: team.edition,
+    editedBy: team.editedBy,
+    editedAt: team.editedAt
   };
 };
 

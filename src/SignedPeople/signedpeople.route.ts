@@ -67,7 +67,7 @@ const getSignedHandlerWN: any = async (req: AuthRequest, res: Response) => {
 };
 
 const createSignedHandler: any = async (req: Request, res: Response) => {
-  const { id, name, tel, email, teamName, lastName, oneCat, multiplesCat } =
+  const { id, name, tel, email, teamName, lastName, oneCat, multiplesCat, cargo } =
     req.body;
   const newdate = new Date(Date.now());
 
@@ -81,6 +81,7 @@ const createSignedHandler: any = async (req: Request, res: Response) => {
     multiplesCat,
     oneCat,
     date: newdate,
+    cargo
   };
 
   const result = await makeSignedController(signed);
@@ -111,7 +112,8 @@ const updateSignedHandler: any = async (req: AuthRequest, res: Response) => {
     oneCat,
     multiplesCat,
     date,
-    fase
+    fase,
+    cargo
   } = req.body;
 
   const signed: SignedPeopleType = {
@@ -124,7 +126,8 @@ const updateSignedHandler: any = async (req: AuthRequest, res: Response) => {
     multiplesCat,
     oneCat,
     date,
-    fase
+    fase,
+    cargo
   };
   const { ide } = req.params;
   if (req.user?.rol == "Admin") {

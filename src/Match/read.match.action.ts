@@ -1,9 +1,11 @@
 import Match, { matchType } from "./match.model.js";
 
-export const readMatch = async (id?: string) => {
+export const readMatch = async (id?: string, query?: any) => {
   let match;
   if (id) {
     match = await Match.find({ id });
+  } else if (query) {
+    match = await Match.find(query).exec();
   } else {
     match = await Match.find();
   }
@@ -29,13 +31,15 @@ export const transform2Match = (match: any): matchType => {
     scorersB: match.scorersB,
     assistersA: match.assistersA,
     assistersB: match.assistersB,
-    yellowPlayersA: match.yellowPlayers,
-    redPlayersA: match.redPlayers,
-    yellowPlayersB: match.yellowPlayers,
-    redPlayersB: match.redPlayers,
+    yellowPlayersA: match.yellowPlayersA,
+    redPlayersA: match.redPlayersA,
+    yellowPlayersB: match.yellowPlayersB,
+    redPlayersB: match.redPlayersB,
     referee: match.referee,
     formacionA: match.formacionA,
     formacionB: match.formacionB,
+    finalFormacionA: match.finalFormacionA,
+    finalFormacionB: match.finalFormacionB,
     yellowCards: match.yellowCards,
     redCards: match.redCards,
     eventos: match.eventos,
@@ -43,7 +47,7 @@ export const transform2Match = (match: any): matchType => {
     status: match.status,
     extraTime: match.extraTime,
     extraTime2: match.extraTime2,
-    penaltyTakersA: match.penañtyTakersA,
+    penaltyTakersA: match.penaltyTakersA,
     penaltyTakersB: match.penaltyTakersB,
     penaltyStarter: match.penaltyStarter,
     penalties: match.penalties,
@@ -53,6 +57,8 @@ export const transform2Match = (match: any): matchType => {
     order: match.order,
     nextRound: match.nextRound,
     cornersA: match.cornersA,
-    cornersB: match.cornersB
+    cornersB: match.cornersB,
+    faultsA: match.faultsA,
+    faultsB: match.faultsB,
   };
 };

@@ -10,7 +10,7 @@ import { PlayerType } from "./player.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import { API_KEY, API_SECRET, CLOUD_NAME } from "../App/config.js";
 
-export const makePlayerController = async (player: PlayerType, file?: any) => {
+export const makePlayerController = async (player: PlayerType, username: string, file?: any) => {
   try {
     cloudinary.config({
       cloud_name: CLOUD_NAME,
@@ -39,13 +39,13 @@ export const makePlayerController = async (player: PlayerType, file?: any) => {
         });
     }
 
-    player.image = uploadResult ? uploadResult.secure_url : " ";
-    player.image_id = uploadResult ? uploadResult.public_id : " ";
+    player.image = uploadResult ? uploadResult.secure_url : null;
+    player.image_id = uploadResult ? uploadResult.public_id : null;
 
-    const result = await registerAPlayer(player);
+    const result = await registerAPlayer(player, username);
     return result;
   } catch (error) {
-    return { error: String(error) };  //Failed to register a player
+    return { error: "Failed to register a player" };
   }
 };
 
@@ -70,14 +70,15 @@ export const getPlayersControllerWOId = async (query?: any) => {
 export const deletePlayerController = async (
   id: string,
   editionPlayed: string,
+  username:string
 ) => {
   try {
     const player = await readPlayers(id);
     const playerR = transform2Player((player as PlayerType[])[0]);
-    if (playerR.image !== " ") {
+    if (playerR.image !== null ) {
       const deleteFlag = cloudinary.uploader.destroy(playerR.image_id!);
     }
-    const result = await deleteAPlayer(id, editionPlayed);
+    const result = await deleteAPlayer(id, editionPlayed, username);
     return result;
   } catch (error) {
     return { error: "Failed to delete a player" };
@@ -98,7 +99,7 @@ export const updatePlayerController = async (
         "base64",
       )}`;
 
-      if (player2Update.image !== " ") {
+      if (player2Update.image !== null) {
         // Upload an image
         uploadResult = await cloudinary.uploader
           .upload(base64String, {
@@ -111,14 +112,14 @@ export const updatePlayerController = async (
           .catch((error) => {
             console.log(error);
           });
-        player2Update.image = uploadResult ? uploadResult.secure_url : " ";
-        player2Update.image_id = uploadResult ? uploadResult.public_id : " ";
+        player2Update.image = uploadResult ? uploadResult.secure_url : null;
+        player2Update.image_id = uploadResult ? uploadResult.public_id : null;
       } else {
         // update image
         uploadResult = await cloudinary.uploader
           .upload(base64String, {
             folder: "players/images",
-            public_id: player2Update.image_id,
+            public_id: player2Update.image_id!,
             overwrite: true,
             transformation: [
               { width: 800, height: 800, crop: "limit" },

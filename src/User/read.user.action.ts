@@ -4,7 +4,7 @@ export const readUser = async (username?: string) => {
   if (username) {
     const user = await User.find({ username });
     user[0].password = "No password";
-    return user ? user[0] : { error: "User not found" };
+    return user ? transform2User(user[0]) : { error: "User not found" };
   } else {
     const users = await User.find();
     users.map((user) => {

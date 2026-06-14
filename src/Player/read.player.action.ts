@@ -71,5 +71,8 @@ export const transform2Player = (player: any): playerType => {
     subInGames: player.subInGames,
     age: player.age,
     birthYear: player.birthYear,
+    talla: player.talla,
+    editedAt: player.editedAt,
+    editedBy: player.editedBy
   };
 };

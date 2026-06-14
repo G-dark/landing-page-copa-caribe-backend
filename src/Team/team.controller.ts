@@ -65,7 +65,6 @@ export const getTeamsController = async (id?: string, query?: any) => {
 export const updateTeamController = async (
   id: string,
   team: teamType,
-  username: string,
   file?: any,
 ) => {
   try {
@@ -81,7 +80,7 @@ export const updateTeamController = async (
       // Convertir buffer a base64
       base64String = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
 
-      if (team.flag !== " ") {
+      if (team.flag !== null) {
         // Upload an image
         uploadResult = await cloudinary.uploader
           .upload(base64String, {
@@ -94,14 +93,14 @@ export const updateTeamController = async (
           .catch((error) => {
             console.log(error);
           });
-        team.flag = uploadResult ? uploadResult.secure_url : " ";
-        team.id_flag = uploadResult ? uploadResult.public_id : " ";
+        team.flag = uploadResult ? uploadResult.secure_url : null;
+        team.id_flag = uploadResult ? uploadResult.public_id : null;
       } else {
         // update image
         uploadResult = await cloudinary.uploader
           .upload(base64String, {
             folder: "teams/flags",
-            public_id: team.id_flag,
+            public_id: team.id_flag!,
             overwrite: true,
             transformation: [
               { width: 800, height: 800, crop: "limit" },
@@ -114,7 +113,7 @@ export const updateTeamController = async (
       }
     }
 
-    return await updateATeam(id, team, username);
+    return await updateATeam(id, team);
   } catch (error) {
     return { error: "Failed to update team" };
   }
@@ -129,7 +128,7 @@ export const deleteTeamController = async (id: string, username: string) => {
     });
     const team = await readTeams(id);
     const teamR = transform2Team((team as teamType[])[0]);
-    if (teamR.id_flag && teamR.flag !== " ") {
+    if (teamR.id_flag && teamR.flag !== null) {
       const deleteFlag = await cloudinary.uploader.destroy(teamR.id_flag);
     }
 
@@ -137,7 +136,7 @@ export const deleteTeamController = async (id: string, username: string) => {
 
     if (coachs) {
       for (let coach of coachs) {
-        if (coach.image !== " ") {
+        if (coach.image !== null) {
           await cloudinary.uploader.destroy(coach.image_id!);
         }
       }
@@ -152,6 +151,7 @@ export const deleteTeamController = async (id: string, username: string) => {
 export const addCoachController = async (
   id: string,
   coach: coachInfo,
+  username:string,
   file?: any,
 ) => {
   try {
@@ -178,17 +178,17 @@ export const addCoachController = async (
         .catch((error) => {
           console.log(error);
         });
-      coach.image = uploadResult ? uploadResult.secure_url : " ";
-      coach.image_id = uploadResult ? uploadResult.public_id : " ";
+      coach.image = uploadResult ? uploadResult.secure_url : null;
+      coach.image_id = uploadResult ? uploadResult.public_id : null;
     }
 
-    return await addACoach(id, coach);
+    return await addACoach(id, coach, username);
   } catch (error) {
     return { error: "Failed to add the coach" };
   }
 };
 
-export const deleteCoachController = async (id: string, idCoach: string) => {
+export const deleteCoachController = async (id: string, idCoach: string, username: string) => {
   try {
     cloudinary.config({
       cloud_name: CLOUD_NAME,
@@ -201,14 +201,14 @@ export const deleteCoachController = async (id: string, idCoach: string) => {
       return coach.id == idCoach;
     });
     if (coachIndex) {
-      if (teamR.coach && teamR.coach[coachIndex].image !== " ") {
+      if (teamR.coach && teamR.coach[coachIndex].image !== null) {
         await cloudinary.uploader.destroy(teamR.coach[coachIndex].image_id!);
       }
     } else {
       return { error: "That coach doesn't exist" };
     }
 
-    return await deleteACoach(id, idCoach);
+    return await deleteACoach(id, idCoach, username);
   } catch (error) {
     return { error: "Failed to delete the coach" };
   }
@@ -218,6 +218,7 @@ export const updateCoachController = async (
   id: string,
   coach: coachInfo,
   idCoach: string,
+  username: string,
   file?: any,
 ) => {
   let base64String, uploadResult;
@@ -231,7 +232,7 @@ export const updateCoachController = async (
       // Convertir buffer a base64
       base64String = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
 
-      if (coach.image !== " ") {
+      if (coach.image !== null) {
         // Upload an image
         uploadResult = await cloudinary.uploader
           .upload(base64String, {
@@ -244,14 +245,14 @@ export const updateCoachController = async (
           .catch((error) => {
             console.log(error);
           });
-        coach.image = uploadResult ? uploadResult.secure_url : " ";
-        coach.image_id = uploadResult ? uploadResult.public_id : " ";
+        coach.image = uploadResult ? uploadResult.secure_url : null;
+        coach.image_id = uploadResult ? uploadResult.public_id : null;
       } else {
         // update image
         uploadResult = await cloudinary.uploader
           .upload(base64String, {
             folder: "teams/coachs",
-            public_id: coach.image_id,
+            public_id: coach.image_id!,
             overwrite: true,
             transformation: [
               { width: 800, height: 800, crop: "limit" },
@@ -264,7 +265,7 @@ export const updateCoachController = async (
       }
     }
 
-    return await updateACoach(id, idCoach, coach);
+    return await updateACoach(id, idCoach, coach, username);
   } catch (error) {
     return { error: "Failed to update the coach"  };
   }

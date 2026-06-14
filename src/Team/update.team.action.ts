@@ -3,8 +3,7 @@ import Team, { coachInfo, teamType } from "./team.model.js";
 
 export const updateATeam = async (
   id: string,
-  team: teamType,
-  username: string,
+  team: teamType
 ) => {
   const updated = await Team.findOneAndUpdate({ id }, { $set: team });
 
@@ -19,9 +18,11 @@ export const updateACoach = async (
   id: string,
   idCoach: string,
   coach: coachInfo,
+  username: string,
 ) => {
   const team = await Team.find({ id });
-
+  team[0].editedAt = new Date(Date.now());
+  team[0].editedBy = username;
   const coachs = team[0].coach;
 
   if (coachs) {
@@ -50,8 +51,14 @@ export const updateACoach = async (
   }
 };
 
-export const addACoach = async (id: string, coach: coachInfo) => {
+export const addACoach = async (
+  id: string,
+  coach: coachInfo,
+  username: string,
+) => {
   const team = await Team.find({ id });
+  team[0].editedAt = new Date(Date.now());
+  team[0].editedBy = username;
   if (team.length > 0) {
     if (team[0].coach && team[0].coach.length > 0) {
       const findCoach = team[0].coach.find((c) => {
@@ -73,8 +80,14 @@ export const addACoach = async (id: string, coach: coachInfo) => {
   }
 };
 
-export const deleteACoach = async (id: string, idCoach: string) => {
+export const deleteACoach = async (
+  id: string,
+  idCoach: string,
+  username: string,
+) => {
   const team = await Team.find({ id });
+  team[0].editedAt = new Date(Date.now());
+  team[0].editedBy = username;
   if (team.length > 0) {
     const coachs = team[0].coach;
     if (coachs) {
@@ -89,5 +102,3 @@ export const deleteACoach = async (id: string, idCoach: string) => {
     return { error: "That team doesn't exist" };
   }
 };
-
-
