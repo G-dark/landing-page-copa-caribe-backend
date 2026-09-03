@@ -10,7 +10,7 @@ const user: UserType = {
   rol: "Admin",
 };
 
-app.listen(APP_PORT,async () => {
+app.listen(APP_PORT, "0.0.0.0", async () => {
     console.log(`Server running on port ${APP_PORT}`);
     console.log(await initializeSuperUser(user));
 });
