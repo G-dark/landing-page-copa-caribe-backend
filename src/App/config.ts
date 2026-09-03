@@ -6,7 +6,7 @@ dotenv.config({
   path: `.env.${process.env.NODE_ENV || "development"}`
 });
 
-export const APP_PORT = process.env.PORT || 3000;
+export const APP_PORT = Number(process.env.PORT) || 3000;
 export const APP_HOST = process.env.HOST || "localhost";
 export const MONGO_URI = process.env.MONGO_URI || "";
 export const JWT_SECRET = process.env.JWT_SECRET || "";
