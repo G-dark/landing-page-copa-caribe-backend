@@ -10,7 +10,7 @@ export const makeUserController = async (user: UserType) => {
   try {
     return await registerAUser(user);
   } catch (error) {
-    return { error: "Failed to delete" };
+    return { error:  "Failed to create" }; 
   }
 };
 

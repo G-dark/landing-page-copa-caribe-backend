@@ -69,7 +69,6 @@ const updateUserHandler: any = async (req: AuthRequest, res: Response) => {
 
 const createUserHandler: any = async (req: AuthRequest, res: Response) => {
   const { user } = req.body;
-
   if (req.user?.rol == "Admin") {
     const result = await makeUserController(user);
     const statusCode = result.success ? 200 : 500;
@@ -82,7 +81,7 @@ const loginUserHandler: any = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   const result = await loginUserController(username, password);
   const statusCode = result.success ? 200 : 500;
-  return res.status(statusCode).json(result); 
+  return res.status(statusCode).json(result);
 };
 
 const refreshTokenHandler: any = async (req: Request, res: Response) => {
@@ -97,6 +96,7 @@ const CreateUser4SignedHandler: any = async (
   res: Response,
 ) => {
   const { name, lastName, id, email, tel } = req.body;
+  let user: UserType;
   if (req.user?.rol == "Admin") {
     let result2, result, name1, name2, ln1, ln2;
     let usernameS = "";
@@ -131,7 +131,7 @@ const CreateUser4SignedHandler: any = async (
       seleccion = Math.floor(Math.random() * 2);
       usernameS += values[seleccion].substring(0, 1);
 
-      const user: UserType = {
+       user = {
         username: usernameS,
         password: id,
         email,
@@ -147,7 +147,7 @@ const CreateUser4SignedHandler: any = async (
       usernameS,
       id,
     );
-    const statusCode = result.success && result.success ? 200 : 500;
+    const statusCode =  result.success && result2.success ? 200 : 500;
     return res.status(statusCode).json(result);
   } else {
     return res.status(403).json({ error: "Not permissions" });

@@ -6,8 +6,10 @@
       "esModuleInterop": true,
       "outDir": "./dist",
       "rootDir": "./src",
-      "strict": true
+      "strict": true,
+      "types": ["node", "jest"],
     },
+
     "include": ["src/**/*" ],
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", "Test"]
   }

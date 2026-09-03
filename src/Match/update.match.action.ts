@@ -20,7 +20,7 @@ export const updateAMatch = async (id: string, match: matchType) => {
 
 export const addEvent = async (evento: evento, id: string) => {
   const match = await Match.find({ id });
-  console.log(match[0]);
+
   if (match[0].eventos.length == 0) {
     evento.id = id + "-" + Number(match[0].eventos.length + 1);
   } else {
@@ -149,7 +149,9 @@ export const changeStatsBOEvent = async (
           );
         }
       }
-
+      tournament[0].assisters = tournament[0].assisters.sort(
+        (a, b) => b.assists - a.assists,
+      );
       break;
     case "AssistB":
       if (action == "Update") {
@@ -200,25 +202,27 @@ export const changeStatsBOEvent = async (
         }
       }
 
+      tournament[0].assisters = tournament[0].assisters.sort(
+        (a, b) => b.assists - a.assists,
+      );
       break;
     case "GoalA":
       if (action == "Update") {
         match[0].scorersA.push(player!);
         playerR[0].goals++;
 
-         if (tournament[0].goalscorers.some((p) => p.player == player)) {
-        const scorersIndex = tournament[0].goalscorers.findIndex(
-          (p) => p.player == player,
-        );
-        tournament[0].goalscorers[scorersIndex].goals++;
-      } else {
-        tournament[0].goalscorers.push({
-          team: playerR[0].team,
-          player: playerR[0].id,
-          goals: 1,
-        });
-      }
-
+        if (tournament[0].goalscorers.some((p) => p.player == player)) {
+          const scorersIndex = tournament[0].goalscorers.findIndex(
+            (p) => p.player == player,
+          );
+          tournament[0].goalscorers[scorersIndex].goals++;
+        } else {
+          tournament[0].goalscorers.push({
+            team: playerR[0].team,
+            player: playerR[0].id,
+            goals: 1,
+          });
+        }
       } else if (action == "Delete") {
         GA = match[0].scorersA.filter((scorer) => {
           return scorer == player;
@@ -230,7 +234,6 @@ export const changeStatsBOEvent = async (
         GA = GA.concat(GA_);
         match[0].scorersA = GA;
         playerR[0].goals--;
-
 
         if (
           tournament[0].goalscorers.some(
@@ -251,7 +254,9 @@ export const changeStatsBOEvent = async (
           );
         }
       }
-
+      tournament[0].goalscorers = tournament[0].goalscorers.sort(
+        (a, b) => b.goals - a.goals,
+      );
 
       break;
     case "GoalB":
@@ -260,17 +265,17 @@ export const changeStatsBOEvent = async (
         playerR[0].goals++;
 
         if (tournament[0].goalscorers.some((p) => p.player == player)) {
-        const scorersIndex = tournament[0].goalscorers.findIndex(
-          (p) => p.player == player,
-        );
-        tournament[0].goalscorers[scorersIndex].goals++;
-      } else {
-        tournament[0].goalscorers.push({
-          team: playerR[0].team,
-          player: playerR[0].id,
-          goals: 1,
-        });
-      }
+          const scorersIndex = tournament[0].goalscorers.findIndex(
+            (p) => p.player == player,
+          );
+          tournament[0].goalscorers[scorersIndex].goals++;
+        } else {
+          tournament[0].goalscorers.push({
+            team: playerR[0].team,
+            player: playerR[0].id,
+            goals: 1,
+          });
+        }
       } else if (action == "Delete") {
         GA = match[0].scorersB.filter((scorer) => {
           return scorer == player;
@@ -285,7 +290,7 @@ export const changeStatsBOEvent = async (
         match[0].scorersB = GA;
         playerR[0].goals--;
 
-         if (
+        if (
           tournament[0].goalscorers.some(
             (p) => p.player == player && p.goals > 1,
           )
@@ -304,7 +309,9 @@ export const changeStatsBOEvent = async (
           );
         }
       }
-
+      tournament[0].goalscorers = tournament[0].goalscorers.sort(
+        (a, b) => b.goals - a.goals,
+      );
       break;
     case "RedA":
       if (action == "Update") {
@@ -339,21 +346,24 @@ export const changeStatsBOEvent = async (
         }
 
         if (
-        tournament[0].playerWithMostYellowCards.some((p) => p.player == player)
-      ) {
-        const mostYellowCIndex =
-          tournament[0].playerWithMostYellowCards.findIndex(
+          tournament[0].playerWithMostYellowCards.some(
             (p) => p.player == player,
-          );
+          )
+        ) {
+          const mostYellowCIndex =
+            tournament[0].playerWithMostYellowCards.findIndex(
+              (p) => p.player == player,
+            );
 
-        tournament[0].playerWithMostYellowCards[mostYellowCIndex].yellowCards++;
-      } else {
-        tournament[0].playerWithMostYellowCards.push({
-          team: playerR[0].team,
-          player: playerR[0].id,
-          yellowCards: 1,
-        });
-      }
+          tournament[0].playerWithMostYellowCards[mostYellowCIndex]
+            .yellowCards++;
+        } else {
+          tournament[0].playerWithMostYellowCards.push({
+            team: playerR[0].team,
+            player: playerR[0].id,
+            yellowCards: 1,
+          });
+        }
       } else if (action == "Delete") {
         const findPlayer = match[0].redPlayersA.find((rp) => {
           return rp == player!;
@@ -396,18 +406,24 @@ export const changeStatsBOEvent = async (
           const playerYellowIndex = tournament[0].goalscorers.findIndex(
             (p) => p.player == player,
           );
-          tournament[0].playerWithMostYellowCards[playerYellowIndex].yellowCards--;
+          tournament[0].playerWithMostYellowCards[playerYellowIndex]
+            .yellowCards--;
         } else if (
           tournament[0].playerWithMostYellowCards.some(
             (p) => p.player == player && p.yellowCards == 1,
           )
         ) {
-          tournament[0].playerWithMostYellowCards = tournament[0].playerWithMostYellowCards.filter(
-            (p) => p.player !== player,
-          );
+          tournament[0].playerWithMostYellowCards =
+            tournament[0].playerWithMostYellowCards.filter(
+              (p) => p.player !== player,
+            );
         }
       }
 
+      tournament[0].playerWithMostYellowCards =
+        tournament[0].playerWithMostYellowCards.sort(
+          (a, b) => b.yellowCards - a.yellowCards,
+        );
 
       break;
     case "RedB":
@@ -443,22 +459,25 @@ export const changeStatsBOEvent = async (
           playerR[0].yellowCards++;
         }
 
-         if (
-        tournament[0].playerWithMostYellowCards.some((p) => p.player == player)
-      ) {
-        const mostYellowCIndex =
-          tournament[0].playerWithMostYellowCards.findIndex(
+        if (
+          tournament[0].playerWithMostYellowCards.some(
             (p) => p.player == player,
-          );
+          )
+        ) {
+          const mostYellowCIndex =
+            tournament[0].playerWithMostYellowCards.findIndex(
+              (p) => p.player == player,
+            );
 
-        tournament[0].playerWithMostYellowCards[mostYellowCIndex].yellowCards++;
-      } else {
-        tournament[0].playerWithMostYellowCards.push({
-          team: playerR[0].team,
-          player: playerR[0].id,
-          yellowCards: 1,
-        });
-      }
+          tournament[0].playerWithMostYellowCards[mostYellowCIndex]
+            .yellowCards++;
+        } else {
+          tournament[0].playerWithMostYellowCards.push({
+            team: playerR[0].team,
+            player: playerR[0].id,
+            yellowCards: 1,
+          });
+        }
       } else if (action == "Delete") {
         const findPlayer = match[0].redPlayersB.find((rp) => {
           return rp == player!;
@@ -502,17 +521,24 @@ export const changeStatsBOEvent = async (
           const playerYellowIndex = tournament[0].goalscorers.findIndex(
             (p) => p.player == player,
           );
-          tournament[0].playerWithMostYellowCards[playerYellowIndex].yellowCards--;
+          tournament[0].playerWithMostYellowCards[playerYellowIndex]
+            .yellowCards--;
         } else if (
           tournament[0].playerWithMostYellowCards.some(
             (p) => p.player == player && p.yellowCards == 1,
           )
         ) {
-          tournament[0].playerWithMostYellowCards = tournament[0].playerWithMostYellowCards.filter(
-            (p) => p.player !== player,
-          );
+          tournament[0].playerWithMostYellowCards =
+            tournament[0].playerWithMostYellowCards.filter(
+              (p) => p.player !== player,
+            );
         }
       }
+
+      tournament[0].playerWithMostYellowCards =
+        tournament[0].playerWithMostYellowCards.sort(
+          (a, b) => b.yellowCards - a.yellowCards,
+        );
 
       break;
     case "SubstitutionA":
@@ -642,6 +668,23 @@ export const changeStatsBOEvent = async (
           match[0].rules.minutesPerTime * 2 +
           match[0].extraTime! +
           match[0].extraTime2!;
+        if (match[0].winner == "NA") {
+          const marcador = match[0].result?.split("-");
+          if (Number(marcador![0]) > Number(marcador![1])) {
+            match[0].winner = "A";
+          } else if (Number(marcador![1]) > Number(marcador![0])) {
+            match[0].winner = "B";
+          } else if (Number(marcador![0]) == Number(marcador![1])) {
+            const marcadorPenales = match[0].penaltieResult?.split("-");
+            if (Number(marcadorPenales![0]) > Number(marcadorPenales![1])) {
+              match[0].winner = "A";
+            } else if (
+              Number(marcadorPenales![1]) > Number(marcadorPenales![0])
+            ) {
+              match[0].winner = "B";
+            }
+          }
+        }
 
         match[0].status = "Finalizado";
       } else if (action == "Delete") {
@@ -655,7 +698,7 @@ export const changeStatsBOEvent = async (
 
       break;
     case "RestTime":
-      if ((action = "Update")) {
+      if (action == "Update") {
         match[0].status = "Entretiempo";
       } else if (action == "Delete") {
         match[0].status = "En vivo";
@@ -665,36 +708,49 @@ export const changeStatsBOEvent = async (
     case "Positions":
       const matches = await Match.find({
         tournament: match[0].tournament,
-        phase: match[0].phase,
+        phase: "Grupos",
         status: "Programado",
-        order: match[0].order,
       });
       const matchesLive = await Match.find({
         tournament: match[0].tournament,
-        phase: match[0].phase,
+        phase: "Grupos",
         status: "En vivo",
-        order: match[0].order,
+      });
+
+      const matchesEntretiempo = await Match.find({
+        tournament: match[0].tournament,
+        phase: "Grupos",
+        status: "Entretiempo",
+      });
+
+      const matchesPenales = await Match.find({
+        tournament: match[0].tournament,
+        phase: "Grupos",
+        status: "Penales",
       });
       const marcador = match[0].result?.split("-");
 
       if (match[0].phase == "Grupos") {
         let teamInGroupIndex, teamInGroupIndexB;
 
+        // getting  the index of the team in the group to update stats
+
         teamInGroupIndex = tournament[0].boardGroups[
           Number(match[0].order) - 1
         ].findIndex((teamInGroup) => {
           return teamInGroup.team == match[0].teamA;
         });
-        console.log(Number(match[0].order) - 1);
+
         teamInGroupIndexB = tournament[0].boardGroups[
           Number(match[0].order) - 1
         ].findIndex((teamInGroup) => {
           return teamInGroup.team == match[0].teamB;
         });
 
-        if (Number(marcador![0]) > Number(marcador![1])) {
-          // change the stats after the end of the game
+        // change the stats after the end of the game
 
+        if (Number(marcador![0]) > Number(marcador![1])) {
+          // team A wins
           //games won
           tournament[0].boardGroups[Number(match[0].order) - 1][
             teamInGroupIndex
@@ -703,9 +759,12 @@ export const changeStatsBOEvent = async (
           tournament[0].boardGroups[Number(match[0].order) - 1][
             teamInGroupIndex
           ].points += 3;
+          tournament[0].boardGroups[Number(match[0].order) - 1][
+            teamInGroupIndexB
+          ].gamesLost++;
         } else if (Number(marcador![0]) < Number(marcador![1])) {
           // change the stats after the end of the game
-
+          // team B wins
           //games won
           tournament[0].boardGroups[Number(match[0].order) - 1][
             teamInGroupIndexB
@@ -714,8 +773,12 @@ export const changeStatsBOEvent = async (
           tournament[0].boardGroups[Number(match[0].order) - 1][
             teamInGroupIndexB
           ].points += 3;
+          tournament[0].boardGroups[Number(match[0].order) - 1][
+            teamInGroupIndex
+          ].gamesLost++;
         } else if (Number(marcador![0]) == Number(marcador![1])) {
           // change the stats after the end of the game
+          // draw, check the penaltie result to see who won the game
           const marcadorPenales = match[0].penaltieResult;
           if (marcadorPenales!.split("-")[0] > marcadorPenales!.split("-")[1]) {
             //games won
@@ -726,6 +789,9 @@ export const changeStatsBOEvent = async (
             tournament[0].boardGroups[Number(match[0].order) - 1][
               teamInGroupIndex
             ].points += 3;
+            tournament[0].boardGroups[Number(match[0].order) - 1][
+              teamInGroupIndexB
+            ].gamesLost++;
           } else if (
             marcadorPenales!.split("-")[0] < marcadorPenales!.split("-")[1]
           ) {
@@ -737,13 +803,15 @@ export const changeStatsBOEvent = async (
             tournament[0].boardGroups[Number(match[0].order) - 1][
               teamInGroupIndexB
             ].points += 3;
+            tournament[0].boardGroups[Number(match[0].order) - 1][
+              teamInGroupIndex
+            ].gamesLost++;
           }
         }
         // team A
         // games played
         tournament[0].boardGroups[Number(match[0].order) - 1][teamInGroupIndex]
           .gamesPlayed++;
-
         // goals done
         tournament[0].boardGroups[Number(match[0].order) - 1][
           teamInGroupIndex
@@ -809,139 +877,1197 @@ export const changeStatsBOEvent = async (
         const sortedGroups = tournament[0].boardGroups[
           Number(match[0].order) - 1
         ].sort((a, b) => {
-          return b.points - a.points;
+          if (b.points - a.points == 0) {
+            return b.goalDifference - a.goalDifference;
+          } else {
+            return b.points - a.points;
+          }
         });
+
         tournament[0].boardGroups[Number(match[0].order) - 1] = sortedGroups;
 
+        tournament[0].markModified("boardGroups");
+        tournament[0].save();
+
         // pass the next round
-        if (matches.length == 0 && matchesLive.length == 0) {
+        if (
+          matches.length == 0 &&
+          matchesLive.length == 0 &&
+          matchesEntretiempo.length == 0 &&
+          matchesPenales.length == 0
+        ) {
           if (
             tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
               8 &&
-            match[0].nextRound == "Repechaje | Semifinal"
+            match[0].nextRound == "Repechaje | Knockout"
           ) {
-            if (match[0].order == "1") {
-              const semifinal1 = await Match.find({
-                phase: "Semifinal",
-                teamA: "1A",
-                tournament: tournament[0].id,
-              });
-              const semifinal2 = await Match.find({
-                phase: "Semifinal",
-                teamA: "2A",
-                tournament: tournament[0].id,
-              });
-              const repechaje1 = await Match.find({
-                phase: "Repechaje",
-                teamA: "3A",
-                tournament: tournament[0].id,
-              });
-              const repechaje2 = await Match.find({
-                phase: "Repechaje",
-                teamA: "4A",
-                tournament: tournament[0].id,
-              });
+            const semifinal1 = await Match.find({
+              phase: "Semifinal",
+              teamA: "1A",
+              tournament: tournament[0].id,
+            });
+            const semifinal2 = await Match.find({
+              phase: "Semifinal",
+              teamA: "1B",
+              tournament: tournament[0].id,
+            });
+            const repechaje1 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3A",
+              tournament: tournament[0].id,
+            });
+            const repechaje2 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3B",
+              tournament: tournament[0].id,
+            });
 
-              semifinal1[0].teamA =
-                tournament[0].boardGroups[Number(match[0].order) - 1][0].team;
-              semifinal2[0].teamA =
-                tournament[0].boardGroups[Number(match[0].order) - 1][1].team;
-              repechaje1[0].teamA =
-                tournament[0].boardGroups[Number(match[0].order) - 1][2].team;
-              repechaje2[0].teamA =
-                tournament[0].boardGroups[Number(match[0].order) - 1][3].team;
-            }
+            // team A
+            semifinal1[0].teamA = tournament[0].boardGroups[0][0].team;
+            semifinal2[0].teamA = tournament[0].boardGroups[1][0].team;
+            repechaje1[0].teamA = tournament[0].boardGroups[0][2].team;
+            repechaje2[0].teamA = tournament[0].boardGroups[1][2].team;
 
-            if (match[0].order == "2") {
-              const semifinal1 = await Match.find({
-                phase: "Semifinal",
-                teamB: "1B",
-                tournament: tournament[0].id,
-              });
-              const semifinal2 = await Match.find({
-                phase: "Semifinal",
-                teamB: "2B",
-                tournament: tournament[0].id,
-              });
-              const repechaje1 = await Match.find({
-                phase: "Repechaje",
-                teamB: "3B",
-                tournament: tournament[0].id,
-              });
-              const repechaje2 = await Match.find({
-                phase: "Repechaje",
-                teamB: "4B",
-                tournament: tournament[0].id,
-              });
+            // team B
 
-              semifinal1[0].teamB =
-                tournament[0].boardGroups[Number(match[0].order) - 1][0].team;
-              semifinal2[0].teamB =
-                tournament[0].boardGroups[Number(match[0].order) - 1][1].team;
-              repechaje1[0].teamB =
-                tournament[0].boardGroups[Number(match[0].order) - 1][2].team;
-              repechaje2[0].teamB =
-                tournament[0].boardGroups[Number(match[0].order) - 1][3].team;
-            }
+            semifinal1[0].teamB = tournament[0].boardGroups[1][1].team;
+            semifinal2[0].teamB = tournament[0].boardGroups[0][1].team;
+            repechaje1[0].teamB = tournament[0].boardGroups[0][3].team;
+            repechaje2[0].teamB = tournament[0].boardGroups[1][3].team;
+
+            await Match.updateOne(
+              { id: semifinal1[0].id },
+              { $set: semifinal1[0] },
+            );
+            await Match.updateOne(
+              { id: semifinal2[0].id },
+              { $set: semifinal2[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje1[0].id },
+              { $set: repechaje1[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje2[0].id },
+              { $set: repechaje2[0] },
+            );
+          }
+          if (
+            tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+              12 &&
+            tournament[0].numberTeamsPerGroup == 4 &&
+            match[0].nextRound == "Repechaje | Knockout"
+          ) {
+            let tabla = [
+              tournament[0].boardGroups[0][0],
+              tournament[0].boardGroups[0][1],
+              tournament[0].boardGroups[1][0],
+              tournament[0].boardGroups[1][1],
+              tournament[0].boardGroups[2][0],
+              tournament[0].boardGroups[2][1],
+            ];
+            tabla = tabla.sort((a, b) => {
+              if (b.points - a.points == 0) {
+                return b.goalDifference - a.goalDifference;
+              }
+              return b.points - a.points;
+            });
+            const ps1 = await Match.find({
+              phase: "Pre-semifinal",
+              teamA: "3",
+              tournament: tournament[0].id,
+            });
+            const ps2 = await Match.find({
+              phase: "Pre-semifinal",
+              teamA: "5",
+              tournament: tournament[0].id,
+            });
+            const sf1 = await Match.find({
+              phase: "Semifinal",
+              teamA: "1",
+              tournament: tournament[0].id,
+            });
+            const sf2 = await Match.find({
+              phase: "Semifinal",
+              teamA: "2",
+              tournament: tournament[0].id,
+            });
+            const repechaje1 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3A",
+              tournament: tournament[0].id,
+            });
+            const repechaje2 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3B",
+              tournament: tournament[0].id,
+            });
+            const repechaje3 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3C",
+              tournament: tournament[0].id,
+            });
+
+            // team A
+
+            sf1[0].teamA = tabla[0].team;
+            sf2[0].teamA = tabla[1].team;
+            ps1[0].teamA = tabla[2].team;
+            ps2[0].teamA = tabla[4].team;
+            repechaje1[0].teamA = tournament[0].boardGroups[0][2].team;
+            repechaje2[0].teamA = tournament[0].boardGroups[1][2].team;
+            repechaje3[0].teamA = tournament[0].boardGroups[2][2].team;
+
+            // team B
+
+            ps1[0].teamB = tabla[3].team;
+            ps2[0].teamB = tabla[5].team;
+            repechaje1[0].teamB = tournament[0].boardGroups[0][3].team;
+            repechaje2[0].teamB = tournament[0].boardGroups[1][3].team;
+            repechaje3[0].teamB = tournament[0].boardGroups[2][3].team;
+
+            await Match.updateOne({ id: sf1[0].id }, { $set: sf1[0] });
+            await Match.updateOne({ id: sf2[0].id }, { $set: sf2[0] });
+            await Match.updateOne(
+              { id: repechaje1[0].id },
+              { $set: repechaje1[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje2[0].id },
+              { $set: repechaje2[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje3[0].id },
+              { $set: repechaje3[0] },
+            );
+            await Match.updateOne({ id: ps1[0].id }, { $set: ps1[0] });
+            await Match.updateOne({ id: ps2[0].id }, { $set: ps2[0] });
+          }
+
+          if (
+            tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+              16 &&
+            match[0].nextRound == "Repechaje | Knockout"
+          ) {
+            const cf1 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "1A",
+              tournament: tournament[0].id,
+            });
+            const cf2 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "1B",
+              tournament: tournament[0].id,
+            });
+            const cf3 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "1D",
+              tournament: tournament[0].id,
+            });
+            const cf4 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "1C",
+              tournament: tournament[0].id,
+            });
+            const repechaje1 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3A",
+              tournament: tournament[0].id,
+            });
+            const repechaje2 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3B",
+              tournament: tournament[0].id,
+            });
+            const repechaje3 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3C",
+              tournament: tournament[0].id,
+            });
+            const repechaje4 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3D",
+              tournament: tournament[0].id,
+            });
+
+            // team A
+            cf1[0].teamA = tournament[0].boardGroups[0][0].team;
+            cf2[0].teamA = tournament[0].boardGroups[1][0].team;
+            cf3[0].teamA = tournament[0].boardGroups[2][0].team;
+            cf4[0].teamA = tournament[0].boardGroups[3][0].team;
+            repechaje1[0].teamA = tournament[0].boardGroups[0][2].team;
+            repechaje2[0].teamA = tournament[0].boardGroups[1][2].team;
+            repechaje3[0].teamA = tournament[0].boardGroups[2][2].team;
+            repechaje4[0].teamA = tournament[0].boardGroups[3][2].team;
+
+            // team B
+
+            cf1[0].teamB = tournament[0].boardGroups[2][1].team;
+            cf2[0].teamB = tournament[0].boardGroups[3][1].team;
+            cf3[0].teamB = tournament[0].boardGroups[1][1].team;
+            cf4[0].teamB = tournament[0].boardGroups[0][1].team;
+            repechaje1[0].teamB = tournament[0].boardGroups[0][3].team;
+            repechaje2[0].teamB = tournament[0].boardGroups[1][3].team;
+            repechaje3[0].teamB = tournament[0].boardGroups[2][3].team;
+            repechaje4[0].teamB = tournament[0].boardGroups[3][3].team;
+
+            await Match.updateOne({ id: cf1[0].id }, { $set: cf1[0] });
+            await Match.updateOne({ id: cf2[0].id }, { $set: cf2[0] });
+            await Match.updateOne({ id: cf3[0].id }, { $set: cf3[0] });
+            await Match.updateOne({ id: cf4[0].id }, { $set: cf4[0] });
+            await Match.updateOne(
+              { id: repechaje1[0].id },
+              { $set: repechaje1[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje2[0].id },
+              { $set: repechaje2[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje3[0].id },
+              { $set: repechaje3[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje4[0].id },
+              { $set: repechaje4[0] },
+            );
+          }
+          if (
+            tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+              20 &&
+            tournament[0].numberTeamsPerGroup == 4 &&
+            match[0].nextRound == "Repechaje | Knockout"
+          ) {
+            let tabla = [
+              tournament[0].boardGroups[0][0],
+              tournament[0].boardGroups[0][1],
+              tournament[0].boardGroups[1][0],
+              tournament[0].boardGroups[1][1],
+              tournament[0].boardGroups[2][0],
+              tournament[0].boardGroups[2][1],
+              tournament[0].boardGroups[3][0],
+              tournament[0].boardGroups[3][1],
+              tournament[0].boardGroups[4][0],
+              tournament[0].boardGroups[4][1],
+            ];
+            tabla = tabla.sort((a, b) => {
+              if (b.points - a.points == 0) {
+                return b.goalDifference - a.goalDifference;
+              }
+              return b.points - a.points;
+            });
+            const pc1 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "7",
+              tournament: tournament[0].id,
+            });
+            const pc2 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "9",
+              tournament: tournament[0].id,
+            });
+            const cf1 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "1",
+              tournament: tournament[0].id,
+            });
+            const cf2 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "3",
+              tournament: tournament[0].id,
+            });
+            const cf3 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "5",
+              tournament: tournament[0].id,
+            });
+
+            const repechaje1 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3A",
+              tournament: tournament[0].id,
+            });
+            const repechaje2 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3B",
+              tournament: tournament[0].id,
+            });
+            const repechaje3 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3C",
+              tournament: tournament[0].id,
+            });
+            const repechaje4 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3D",
+              tournament: tournament[0].id,
+            });
+            const repechaje5 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3E",
+              tournament: tournament[0].id,
+            });
+
+            // team A
+            cf1[0].teamA = tabla[0].team;
+            cf2[0].teamA = tabla[2].team;
+            cf3[0].teamA = tabla[4].team;
+            pc1[0].teamA = tabla[6].team;
+            pc2[0].teamA = tabla[8].team;
+            repechaje1[0].teamA = tournament[0].boardGroups[0][2].team;
+            repechaje2[0].teamA = tournament[0].boardGroups[1][2].team;
+            repechaje3[0].teamA = tournament[0].boardGroups[2][2].team;
+            repechaje4[0].teamA = tournament[0].boardGroups[3][2].team;
+            repechaje5[0].teamA = tournament[0].boardGroups[4][2].team;
+
+            // team B
+
+            cf1[0].teamB = tabla[1].team;
+            cf2[0].teamB = tabla[3].team;
+            cf3[0].teamB = tabla[5].team;
+            pc1[0].teamB = tabla[7].team;
+            pc2[0].teamB = tabla[9].team;
+            repechaje1[0].teamB = tournament[0].boardGroups[0][3].team;
+            repechaje2[0].teamB = tournament[0].boardGroups[1][3].team;
+            repechaje3[0].teamB = tournament[0].boardGroups[2][3].team;
+            repechaje4[0].teamB = tournament[0].boardGroups[3][3].team;
+            repechaje5[0].teamB = tournament[0].boardGroups[4][3].team;
+
+            await Match.updateOne({ id: cf1[0].id }, { $set: cf1[0] });
+            await Match.updateOne({ id: cf2[0].id }, { $set: cf2[0] });
+            await Match.updateOne({ id: cf3[0].id }, { $set: cf3[0] });
+            await Match.updateOne({ id: pc1[0].id }, { $set: pc1[0] });
+            await Match.updateOne({ id: pc2[0].id }, { $set: pc2[0] });
+
+            await Match.updateOne(
+              { id: repechaje1[0].id },
+              { $set: repechaje1[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje2[0].id },
+              { $set: repechaje2[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje3[0].id },
+              { $set: repechaje3[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje4[0].id },
+              { $set: repechaje4[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje5[0].id },
+              { $set: repechaje5[0] },
+            );
+          }
+
+          if (
+            tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+              24 &&
+            tournament[0].numberTeamsPerGroup == 4 &&
+            match[0].nextRound == "Repechaje | Knockout"
+          ) {
+            let tabla = [
+              tournament[0].boardGroups[0][0],
+              tournament[0].boardGroups[0][1],
+              tournament[0].boardGroups[1][0],
+              tournament[0].boardGroups[1][1],
+              tournament[0].boardGroups[2][0],
+              tournament[0].boardGroups[2][1],
+              tournament[0].boardGroups[3][0],
+              tournament[0].boardGroups[3][1],
+              tournament[0].boardGroups[4][0],
+              tournament[0].boardGroups[4][1],
+              tournament[0].boardGroups[5][0],
+              tournament[0].boardGroups[5][1],
+            ];
+            tabla = tabla.sort((a, b) => {
+              if (b.points - a.points == 0) {
+                return b.goalDifference - a.goalDifference;
+              }
+              return b.points - a.points;
+            });
+            const pc1 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "5",
+              tournament: tournament[0].id,
+            });
+            const pc2 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "7",
+              tournament: tournament[0].id,
+            });
+            const pc3 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "9",
+              tournament: tournament[0].id,
+            });
+            const pc4 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "11",
+              tournament: tournament[0].id,
+            });
+            const cf1 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "1",
+              tournament: tournament[0].id,
+            });
+            const cf2 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "3",
+              tournament: tournament[0].id,
+            });
+
+            const repechaje1 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3A",
+              tournament: tournament[0].id,
+            });
+            const repechaje2 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3B",
+              tournament: tournament[0].id,
+            });
+            const repechaje3 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3C",
+              tournament: tournament[0].id,
+            });
+            const repechaje4 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3D",
+              tournament: tournament[0].id,
+            });
+            const repechaje5 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3E",
+              tournament: tournament[0].id,
+            });
+            const repechaje6 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3F",
+              tournament: tournament[0].id,
+            });
+
+            // team A
+            pc1[0].teamA = tabla[4].team;
+            pc2[0].teamA = tabla[6].team;
+            pc3[0].teamA = tabla[8].team;
+            pc4[0].teamA = tabla[10].team;
+            cf1[0].teamA = tabla[0].team;
+            cf2[0].teamA = tabla[2].team;
+            repechaje1[0].teamA = tournament[0].boardGroups[0][2].team;
+            repechaje2[0].teamA = tournament[0].boardGroups[1][2].team;
+            repechaje3[0].teamA = tournament[0].boardGroups[2][2].team;
+            repechaje4[0].teamA = tournament[0].boardGroups[3][2].team;
+            repechaje5[0].teamA = tournament[0].boardGroups[4][2].team;
+            repechaje6[0].teamA = tournament[0].boardGroups[5][2].team;
+
+            // team B
+
+            pc1[0].teamB = tabla[5].team;
+            pc2[0].teamB = tabla[7].team;
+            pc3[0].teamB = tabla[9].team;
+            pc4[0].teamB = tabla[11].team;
+            cf1[0].teamB = tabla[1].team;
+            cf2[0].teamB = tabla[3].team;
+            repechaje1[0].teamB = tournament[0].boardGroups[0][3].team;
+            repechaje2[0].teamB = tournament[0].boardGroups[1][3].team;
+            repechaje3[0].teamB = tournament[0].boardGroups[2][3].team;
+            repechaje4[0].teamB = tournament[0].boardGroups[3][3].team;
+            repechaje5[0].teamB = tournament[0].boardGroups[4][3].team;
+            repechaje6[0].teamB = tournament[0].boardGroups[5][3].team;
+
+            await Match.updateOne({ id: cf1[0].id }, { $set: cf1[0] });
+            await Match.updateOne({ id: cf2[0].id }, { $set: cf2[0] });
+            await Match.updateOne({ id: pc1[0].id }, { $set: pc1[0] });
+            await Match.updateOne({ id: pc2[0].id }, { $set: pc2[0] });
+            await Match.updateOne({ id: pc3[0].id }, { $set: pc3[0] });
+            await Match.updateOne({ id: pc4[0].id }, { $set: pc4[0] });
+
+            await Match.updateOne(
+              { id: repechaje1[0].id },
+              { $set: repechaje1[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje2[0].id },
+              { $set: repechaje2[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje3[0].id },
+              { $set: repechaje3[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje4[0].id },
+              { $set: repechaje4[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje5[0].id },
+              { $set: repechaje5[0] },
+            );
+          }
+
+          if (
+            tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+              28 &&
+            tournament[0].numberTeamsPerGroup == 4 &&
+            match[0].nextRound == "Repechaje | Knockout"
+          ) {
+            let tabla = [
+              tournament[0].boardGroups[0][0],
+              tournament[0].boardGroups[0][1],
+              tournament[0].boardGroups[1][0],
+              tournament[0].boardGroups[1][1],
+              tournament[0].boardGroups[2][0],
+              tournament[0].boardGroups[2][1],
+              tournament[0].boardGroups[3][0],
+              tournament[0].boardGroups[3][1],
+              tournament[0].boardGroups[4][0],
+              tournament[0].boardGroups[4][1],
+              tournament[0].boardGroups[5][0],
+              tournament[0].boardGroups[5][1],
+              tournament[0].boardGroups[6][0],
+              tournament[0].boardGroups[6][1],
+            ];
+            tabla = tabla.sort((a, b) => {
+              if (b.points - a.points == 0) {
+                return b.goalDifference - a.goalDifference;
+              }
+              return b.points - a.points;
+            });
+            const pc1 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "3",
+              tournament: tournament[0].id,
+            });
+            const pc2 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "5",
+              tournament: tournament[0].id,
+            });
+            const pc3 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "7",
+              tournament: tournament[0].id,
+            });
+            const pc4 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "9",
+              tournament: tournament[0].id,
+            });
+            const pc5 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "11",
+              tournament: tournament[0].id,
+            });
+            const pc6 = await Match.find({
+              phase: "Pre-cuartos",
+              teamA: "13",
+              tournament: tournament[0].id,
+            });
+            const cf1 = await Match.find({
+              phase: "Cuartos de final",
+              teamA: "1",
+              tournament: tournament[0].id,
+            });
+
+            const repechaje1 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3A",
+              tournament: tournament[0].id,
+            });
+            const repechaje2 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3B",
+              tournament: tournament[0].id,
+            });
+            const repechaje3 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3C",
+              tournament: tournament[0].id,
+            });
+            const repechaje4 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3D",
+              tournament: tournament[0].id,
+            });
+            const repechaje5 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3E",
+              tournament: tournament[0].id,
+            });
+            const repechaje6 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3F",
+              tournament: tournament[0].id,
+            });
+            const repechaje7 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3G",
+              tournament: tournament[0].id,
+            });
+
+            // team A
+            pc1[0].teamA = tabla[2].team;
+            pc2[0].teamA = tabla[4].team;
+            pc3[0].teamA = tabla[6].team;
+            pc4[0].teamA = tabla[8].team;
+            pc5[0].teamA = tabla[10].team;
+            pc6[0].teamA = tabla[12].team;
+            cf1[0].teamA = tabla[0].team;
+
+            repechaje1[0].teamA = tournament[0].boardGroups[0][2].team;
+            repechaje2[0].teamA = tournament[0].boardGroups[1][2].team;
+            repechaje3[0].teamA = tournament[0].boardGroups[2][2].team;
+            repechaje4[0].teamA = tournament[0].boardGroups[3][2].team;
+            repechaje5[0].teamA = tournament[0].boardGroups[4][2].team;
+            repechaje6[0].teamA = tournament[0].boardGroups[5][2].team;
+            repechaje7[0].teamA = tournament[0].boardGroups[6][2].team;
+            // team B
+
+            pc1[0].teamB = tabla[3].team;
+            pc2[0].teamB = tabla[5].team;
+            pc3[0].teamB = tabla[7].team;
+            pc4[0].teamB = tabla[9].team;
+            pc5[0].teamB = tabla[11].team;
+            pc6[0].teamB = tabla[13].team;
+            cf1[0].teamB = tabla[1].team;
+
+            repechaje1[0].teamB = tournament[0].boardGroups[0][3].team;
+            repechaje2[0].teamB = tournament[0].boardGroups[1][3].team;
+            repechaje3[0].teamB = tournament[0].boardGroups[2][3].team;
+            repechaje4[0].teamB = tournament[0].boardGroups[3][3].team;
+            repechaje5[0].teamB = tournament[0].boardGroups[4][3].team;
+            repechaje6[0].teamB = tournament[0].boardGroups[5][3].team;
+            repechaje7[0].teamB = tournament[0].boardGroups[6][3].team;
+
+            await Match.updateOne({ id: cf1[0].id }, { $set: cf1[0] });
+            await Match.updateOne({ id: pc1[0].id }, { $set: pc1[0] });
+            await Match.updateOne({ id: pc2[0].id }, { $set: pc2[0] });
+            await Match.updateOne({ id: pc3[0].id }, { $set: pc3[0] });
+            await Match.updateOne({ id: pc4[0].id }, { $set: pc4[0] });
+            await Match.updateOne({ id: pc5[0].id }, { $set: pc5[0] });
+            await Match.updateOne({ id: pc6[0].id }, { $set: pc6[0] });
+
+            await Match.updateOne(
+              { id: repechaje1[0].id },
+              { $set: repechaje1[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje2[0].id },
+              { $set: repechaje2[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje3[0].id },
+              { $set: repechaje3[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje4[0].id },
+              { $set: repechaje4[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje5[0].id },
+              { $set: repechaje5[0] },
+            );
+          }
+          if (
+            tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+              32 &&
+            tournament[0].numberTeamsPerGroup == 4 &&
+            match[0].nextRound == "Repechaje | Knockout"
+          ) {
+            const of1 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1A",
+              tournament: tournament[0].id,
+            });
+            const of2 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1E",
+              tournament: tournament[0].id,
+            });
+            const of3 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1G",
+              tournament: tournament[0].id,
+            });
+            const of4 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1B",
+              tournament: tournament[0].id,
+            });
+            const of5 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1D",
+              tournament: tournament[0].id,
+            });
+            const of6 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1H",
+              tournament: tournament[0].id,
+            });
+            const of7 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1F",
+              tournament: tournament[0].id,
+            });
+            const of8 = await Match.find({
+              phase: "Octavos de final",
+              teamA: "1C",
+              tournament: tournament[0].id,
+            });
+
+            const repechaje1 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3A",
+              tournament: tournament[0].id,
+            });
+            const repechaje2 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3B",
+              tournament: tournament[0].id,
+            });
+            const repechaje3 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3C",
+              tournament: tournament[0].id,
+            });
+            const repechaje4 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3D",
+              tournament: tournament[0].id,
+            });
+            const repechaje5 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3E",
+              tournament: tournament[0].id,
+            });
+            const repechaje6 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3F",
+              tournament: tournament[0].id,
+            });
+            const repechaje7 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3G",
+              tournament: tournament[0].id,
+            });
+            const repechaje8 = await Match.find({
+              phase: "Repechaje",
+              teamA: "3H",
+              tournament: tournament[0].id,
+            });
+
+            // team A
+            of1[0].teamA = tournament[0].boardGroups[0][0].team;
+            of2[0].teamA = tournament[0].boardGroups[4][0].team;
+            of3[0].teamA = tournament[0].boardGroups[6][0].team;
+            of4[0].teamA = tournament[0].boardGroups[1][0].team;
+            of5[0].teamA = tournament[0].boardGroups[3][0].team;
+            of6[0].teamA = tournament[0].boardGroups[7][0].team;
+            of7[0].teamA = tournament[0].boardGroups[5][0].team;
+            of8[0].teamA = tournament[0].boardGroups[2][0].team;
+
+            repechaje1[0].teamA = tournament[0].boardGroups[0][2].team;
+            repechaje2[0].teamA = tournament[0].boardGroups[1][2].team;
+            repechaje3[0].teamA = tournament[0].boardGroups[2][2].team;
+            repechaje4[0].teamA = tournament[0].boardGroups[3][2].team;
+            repechaje5[0].teamA = tournament[0].boardGroups[4][2].team;
+            repechaje6[0].teamA = tournament[0].boardGroups[5][2].team;
+            repechaje7[0].teamA = tournament[0].boardGroups[6][2].team;
+            repechaje8[0].teamA = tournament[0].boardGroups[7][2].team;
+
+            // team B
+
+            of1[0].teamB = tournament[0].boardGroups[2][1].team;
+            of2[0].teamB = tournament[0].boardGroups[7][1].team;
+            of3[0].teamB = tournament[0].boardGroups[5][1].team;
+            of4[0].teamB = tournament[0].boardGroups[3][1].team;
+            of5[0].teamB = tournament[0].boardGroups[1][1].team;
+            of6[0].teamB = tournament[0].boardGroups[4][1].team;
+            of7[0].teamB = tournament[0].boardGroups[7][1].team;
+            of8[0].teamB = tournament[0].boardGroups[0][1].team;
+            repechaje1[0].teamB = tournament[0].boardGroups[0][3].team;
+            repechaje2[0].teamB = tournament[0].boardGroups[1][3].team;
+            repechaje3[0].teamB = tournament[0].boardGroups[2][3].team;
+            repechaje4[0].teamB = tournament[0].boardGroups[3][3].team;
+            repechaje5[0].teamB = tournament[0].boardGroups[4][3].team;
+            repechaje6[0].teamB = tournament[0].boardGroups[5][3].team;
+            repechaje7[0].teamB = tournament[0].boardGroups[6][3].team;
+            repechaje8[0].teamB = tournament[0].boardGroups[7][3].team;
+
+            await Match.updateOne({ id: of1[0].id }, { $set: of1[0] });
+            await Match.updateOne({ id: of2[0].id }, { $set: of2[0] });
+            await Match.updateOne({ id: of3[0].id }, { $set: of3[0] });
+            await Match.updateOne({ id: of4[0].id }, { $set: of4[0] });
+            await Match.updateOne({ id: of5[0].id }, { $set: of5[0] });
+            await Match.updateOne({ id: of6[0].id }, { $set: of6[0] });
+            await Match.updateOne({ id: of7[0].id }, { $set: of7[0] });
+            await Match.updateOne({ id: of8[0].id }, { $set: of8[0] });
+
+            await Match.updateOne(
+              { id: repechaje1[0].id },
+              { $set: repechaje1[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje2[0].id },
+              { $set: repechaje2[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje3[0].id },
+              { $set: repechaje3[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje4[0].id },
+              { $set: repechaje4[0] },
+            );
+            await Match.updateOne(
+              { id: repechaje5[0].id },
+              { $set: repechaje5[0] },
+            );
           }
         }
       }
       if (match[0].phase == "Octavos de final") {
+        const cf1 = await Match.find({
+          phase: "Cuartos de final",
+          code: "CF1",
+          tournament: tournament[0].id,
+        });
+
+        const cf2 = await Match.find({
+          phase: "Cuartos de final",
+          code: "CF2",
+          tournament: tournament[0].id,
+        });
+        const cf3 = await Match.find({
+          phase: "Cuartos de final",
+          code: "CF3",
+          tournament: tournament[0].id,
+        });
+        const cf4 = await Match.find({
+          phase: "Cuartos de final",
+          code: "CF4",
+          tournament: tournament[0].id,
+        });
+
+        if (match[0].code == "OF1") {
+          if (match[0].winner == "A") {
+            cf1[0].teamA = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf1[0].teamA = match[0].teamB;
+          }
+        }
+
+        if (match[0].code == "OF2") {
+          if (match[0].winner == "A") {
+            cf1[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf1[0].teamB = match[0].teamB;
+          }
+        }
+        if (match[0].code == "OF3") {
+          if (match[0].winner == "A") {
+            cf2[0].teamA = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf2[0].teamA = match[0].teamB;
+          }
+        }
+        if (match[0].code == "OF4") {
+          if (match[0].winner == "A") {
+            cf2[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf2[0].teamB = match[0].teamB;
+          }
+        }
+        if (match[0].code == "OF5") {
+          if (match[0].winner == "A") {
+            cf3[0].teamA = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf3[0].teamA = match[0].teamB;
+          }
+        }
+        if (match[0].code == "OF6") {
+          if (match[0].winner == "A") {
+            cf3[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf3[0].teamB = match[0].teamB;
+          }
+        }
+        if (match[0].code == "OF7") {
+          if (match[0].winner == "A") {
+            cf4[0].teamA = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf4[0].teamA = match[0].teamB;
+          }
+        }
+        if (match[0].code == "OF8") {
+          if (match[0].winner == "A") {
+            cf4[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            cf4[0].teamB = match[0].teamB;
+          }
+        }
+        await Match.updateOne({ id: cf1[0].id }, { $set: cf1[0] });
+        await Match.updateOne({ id: cf2[0].id }, { $set: cf2[0] });
+        await Match.updateOne({ id: cf3[0].id }, { $set: cf3[0] });
+        await Match.updateOne({ id: cf4[0].id }, { $set: cf4[0] });
+      }
+      if (match[0].phase == "Pre-cuartos") {
+        if (
+          tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+            20 &&
+          tournament[0].numberTeamsPerGroup == 4
+        ) {
+          const cf4 = await Match.find({
+            phase: "Cuartos de final",
+            code: "CF4",
+            tournament: tournament[0].id,
+          });
+
+          if (match[0].code == "PC1") {
+            if (match[0].winner == "A") {
+              cf4[0].teamA = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf4[0].teamA = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC2") {
+            if (match[0].winner == "A") {
+              cf4[0].teamB = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf4[0].teamB = match[0].teamB;
+            }
+          }
+
+          await Match.updateOne({ id: cf4[0].id }, { $set: cf4[0] });
+        }
+        if (
+          tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+            24 &&
+          tournament[0].numberTeamsPerGroup == 4
+        ) {
+          const cf3 = await Match.find({
+            phase: "Cuartos de final",
+            code: "CF3",
+            tournament: tournament[0].id,
+          });
+          const cf4 = await Match.find({
+            phase: "Cuartos de final",
+            code: "CF4",
+            tournament: tournament[0].id,
+          });
+
+          if (match[0].code == "PC1") {
+            if (match[0].winner == "A") {
+              cf3[0].teamA = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf3[0].teamA = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC2") {
+            if (match[0].winner == "A") {
+              cf3[0].teamB = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf3[0].teamB = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC3") {
+            if (match[0].winner == "A") {
+              cf4[0].teamA = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf4[0].teamA = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC4") {
+            if (match[0].winner == "A") {
+              cf4[0].teamB = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf4[0].teamB = match[0].teamB;
+            }
+          }
+
+          await Match.updateOne({ id: cf3[0].id }, { $set: cf3[0] });
+          await Match.updateOne({ id: cf4[0].id }, { $set: cf4[0] });
+        }
+
+        if (
+          tournament[0].numberTeamsPerGroup * tournament[0].numberGroups ==
+            28 &&
+          tournament[0].numberTeamsPerGroup == 4
+        ) {
+          const cf2 = await Match.find({
+            phase: "Cuartos de final",
+            code: "CF2",
+            tournament: tournament[0].id,
+          });
+          const cf3 = await Match.find({
+            phase: "Cuartos de final",
+            code: "CF3",
+            tournament: tournament[0].id,
+          });
+          const cf4 = await Match.find({
+            phase: "Cuartos de final",
+            code: "CF4",
+            tournament: tournament[0].id,
+          });
+
+          if (match[0].code == "PC1") {
+            if (match[0].winner == "A") {
+              cf2[0].teamA = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf2[0].teamA = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC2") {
+            if (match[0].winner == "A") {
+              cf2[0].teamB = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf2[0].teamB = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC3") {
+            if (match[0].winner == "A") {
+              cf3[0].teamA = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf3[0].teamA = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC4") {
+            if (match[0].winner == "A") {
+              cf3[0].teamB = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf3[0].teamB = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC5") {
+            if (match[0].winner == "A") {
+              cf4[0].teamA = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf4[0].teamA = match[0].teamB;
+            }
+          }
+
+          if (match[0].code == "PC6") {
+            if (match[0].winner == "A") {
+              cf4[0].teamB = match[0].teamA;
+            } else if (match[0].winner == "B") {
+              cf4[0].teamB = match[0].teamB;
+            }
+          }
+
+          await Match.updateOne({ id: cf2[0].id }, { $set: cf2[0] });
+          await Match.updateOne({ id: cf3[0].id }, { $set: cf3[0] });
+          await Match.updateOne({ id: cf4[0].id }, { $set: cf4[0] });
+        }
       }
       if (match[0].phase == "Cuartos de final") {
+        const sf1 = await Match.find({
+          phase: "Semifinal",
+          code: "SF1",
+          tournament: tournament[0].id,
+        });
+        const sf2 = await Match.find({
+          phase: "Semifinal",
+          code: "SF2",
+          tournament: tournament[0].id,
+        });
+        if (match[0].code == "CF1") {
+          if (match[0].winner == "A") {
+            sf1[0].teamA = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            sf1[0].teamA = match[0].teamB;
+          }
+        }
+
+        if (match[0].code == "CF2") {
+          if (match[0].winner == "A") {
+            sf1[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            sf1[0].teamB = match[0].teamB;
+          }
+        }
+
+        if (match[0].code == "CF3") {
+          if (match[0].winner == "A") {
+            sf2[0].teamA = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            sf2[0].teamA = match[0].teamB;
+          }
+        }
+        if (match[0].code == "CF4") {
+          if (match[0].winner == "A") {
+            sf2[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            sf2[0].teamB = match[0].teamB;
+          }
+        }
+
+        await Match.updateOne({ id: sf1[0].id }, { $set: sf1[0] });
+        await Match.updateOne({ id: sf2[0].id }, { $set: sf2[0] });
+      }
+      if (match[0].phase == "Pre-semifinal") {
+        const sf1 = await Match.find({
+          phase: "Semifinal",
+          code: "SF1",
+          tournament: tournament[0].id,
+        });
+        const sf2 = await Match.find({
+          phase: "Semifinal",
+          code: "SF2",
+          tournament: tournament[0].id,
+        });
+
+        if (match[0].code == "PS1") {
+          if (match[0].winner == "A") {
+            sf1[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            sf1[0].teamB = match[0].teamB;
+          }
+        }
+
+        if (match[0].code == "PS2") {
+          if (match[0].winner == "A") {
+            sf2[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            sf2[0].teamB = match[0].teamB;
+          }
+        }
+        await Match.updateOne({ id: sf1[0].id }, { $set: sf1[0] });
+        await Match.updateOne({ id: sf2[0].id }, { $set: sf2[0] });
       }
       if (match[0].phase == "Semifinal") {
-        if (matches.length == 0 && matchesLive.length == 0) {
-          const final = await Match.find({
-            phase: "Final",
-            tournament: tournament[0].id,
-          });
-          if (Number(marcador![0]) > Number(marcador![1])) {
-            final[0].teamB = match[0].teamA;
-          } else if (Number(marcador![0]) < Number(marcador![1])) {
-            final[0].teamB = match[0].teamB;
-          } else if (Number(marcador![0]) == Number(marcador![1])) {
-            const marcardorPenalties = match[0].penaltieResult?.split("-");
-            if (
-              Number(marcardorPenalties![0]) > Number(marcardorPenalties![1])
-            ) {
-              final[0].teamB = match[0].teamA;
-            } else if (
-              Number(marcardorPenalties![0]) < Number(marcardorPenalties![1])
-            ) {
-              final[0].teamB = match[0].teamB;
-            }
+        const final = await Match.find({
+          phase: "Final",
+          tournament: tournament[0].id,
+        });
+
+        if (match[0].code == "SF1") {
+          if (match[0].winner == "A") {
+            final[0].teamA = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            final[0].teamA = match[0].teamB;
           }
         }
 
-        if (matches.length == 1 || matchesLive.length == 1) {
-          const final = await Match.find({
-            phase: "Final",
-            tournament: tournament[0].id,
-          });
-          if (Number(marcador![0]) > Number(marcador![1])) {
-            final[0].teamA = match[0].teamA;
-          } else if (Number(marcador![0]) < Number(marcador![1])) {
-            final[0].teamA = match[0].teamB;
-          } else if (Number(marcador![0]) == Number(marcador![1])) {
-            const marcardorPenalties = match[0].penaltieResult?.split("-");
-            if (
-              Number(marcardorPenalties![0]) > Number(marcardorPenalties![1])
-            ) {
-              final[0].teamA = match[0].teamA;
-            } else if (
-              Number(marcardorPenalties![0]) < Number(marcardorPenalties![1])
-            ) {
-              final[0].teamA = match[0].teamB;
-            }
+        if (match[0].code == "SF2") {
+          if (match[0].winner == "A") {
+            final[0].teamB = match[0].teamA;
+          } else if (match[0].winner == "B") {
+            final[0].teamB = match[0].teamB;
           }
         }
+        await Match.updateOne({ id: final[0].id }, { $set: final[0] });
       }
 
-      await Tournament.updateOne(
-        { id: match[0].tournament },
-        { $set: tournament[0] },
-      );
       break;
     default:
       return { error: "That action type doesn't exist" };
@@ -953,11 +2079,16 @@ export const changeStatsBOEvent = async (
   const updated = await Match.updateOne({ id }, { $set: match[0] });
   const updated2 = await Player.updateOne({ id: player }, { $set: playerR[0] });
   let updated3;
+  tournament[0].markModified("boardGroups");
+  const updated4 = await Tournament.updateOne(
+    { id: match[0].tournament },
+    { $set: tournament[0] },
+  );
   if (player2) {
     updated3 = await Player.updateOne({ id: player2 }, { $set: playerR2[0] });
   }
 
-  if (updated && updated2) {
+  if (updated && updated2 && updated4) {
     return { success: "Changes registered successfully" };
   } else {
     return { error: "Failed to register the changes" };
@@ -1069,14 +2200,18 @@ export const addPenalty = async (matchID: string, penalty: penalty) => {
       const indexPT = match[0].penaltyTakersA!.findIndex(
         (taker: any) => taker.player == penalty.player && taker.penalty == null,
       );
-      match[0].penaltyTakersA![indexPT].penalty = penalty.id;
+      if (indexPT !== -1) {
+        match[0].penaltyTakersA![indexPT].penalty = penalty.id;
+      }
     }
 
     if (penalty.team == "B") {
       const indexPT = match[0].penaltyTakersB!.findIndex(
         (taker: any) => taker.player == penalty.player && taker.penalty == null,
       );
-      match[0].penaltyTakersB![indexPT].penalty = penalty.id;
+      if (indexPT !== -1) {
+        match[0].penaltyTakersB![indexPT].penalty = penalty.id;
+      }
     }
 
     // adding effects of penalty
@@ -1128,33 +2263,41 @@ export const editPenalty = async (
     if (penalty.result) {
       if (
         (match[0].penalties![penaltyIndex].result == "Goal" &&
-          penalty.result == "Fail") ||
-        (penalty.result == "Saved" && penalty.team == "A")
+          penalty.result == "Fail" &&
+          match[0].penalties![penaltyIndex].team == "A") ||
+        (match[0].penalties![penaltyIndex].result == "Goal" &&
+          penalty.result == "Saved" &&
+          match[0].penalties![penaltyIndex].team == "A")
       ) {
         match[0].penaltieResult =
-          Number(match[0].penaltieResult!.split("-")[0]) -
-          1 +
+          Number(Number(match[0].penaltieResult!.split("-")[0]) -
+          1) +
           "-" +
           match[0].penaltieResult!.split("-")[1];
       }
 
       if (
-        match[0].penalties![penaltyIndex].result == "Saved" ||
+        (match[0].penalties![penaltyIndex].result == "Saved" &&
+          penalty.result == "Goal" &&
+          match[0].penalties![penaltyIndex].team == "A") ||
         (match[0].penalties![penaltyIndex].result == "Fail" &&
           penalty.result == "Goal" &&
-          penalty.team == "A")
+          match[0].penalties![penaltyIndex].team == "A")
       ) {
         match[0].penaltieResult =
-          Number(match[0].penaltieResult!.split("-")[0]) +
-          1 +
+          Number(Number(match[0].penaltieResult!.split("-")[0]) +
+          1) +
           "-" +
           match[0].penaltieResult!.split("-")[1];
       }
 
       if (
         (match[0].penalties![penaltyIndex].result == "Goal" &&
-          penalty.result == "Fail") ||
-        (penalty.result == "Saved" && penalty.team == "B")
+          penalty.result == "Fail" &&
+          match[0].penalties![penaltyIndex].team == "B") ||
+        (match[0].penalties![penaltyIndex].result == "Goal" &&
+          penalty.result == "Saved" &&
+          match[0].penalties![penaltyIndex].team == "B")
       ) {
         match[0].penaltieResult =
           match[0].penaltieResult!.split("-")[0] +
@@ -1163,15 +2306,17 @@ export const editPenalty = async (
       }
 
       if (
-        match[0].penalties![penaltyIndex].result == "Saved" ||
+        (match[0].penalties![penaltyIndex].result == "Saved" &&
+          penalty.result == "Goal" &&
+          match[0].penalties![penaltyIndex].team == "B") ||
         (match[0].penalties![penaltyIndex].result == "Fail" &&
           penalty.result == "Goal" &&
-          penalty.team == "B")
+          match[0].penalties![penaltyIndex].team == "B")
       ) {
         match[0].penaltieResult =
           match[0].penaltieResult!.split("-")[0] +
           "-" +
-          Number(Number(match[0].penaltieResult?.split("-")[1]) - 1);
+          Number(Number(match[0].penaltieResult?.split("-")[1]) + 1);
       }
 
       match[0].penalties![penaltyIndex].result = penalty.result;

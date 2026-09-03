@@ -151,5 +151,5 @@ signedRouter.get("/API/signedSendEmail/:name/:tipo/:email", SendEmailHandler);
 signedRouter.get("/API/signed/:id", authMiddleware, getSignedHandlerID);
 signedRouter.get("/API/signedQuery", authMiddleware, getSignedHandlerQuery);
 signedRouter.post("/API/signed/Create", createSignedHandler);
-signedRouter.delete("/API/signed/delete", authMiddleware, deleteSignedHandler);
+signedRouter.delete("/API/signed/delete/:id", authMiddleware, deleteSignedHandler);
 signedRouter.patch("/API/signed/update/:ide", authMiddleware, updateSignedHandler);

@@ -42,8 +42,8 @@ export const makeTeamController = async (
         .catch((error) => {
           console.log(error);
         });
-      team.flag = uploadResult ? uploadResult.secure_url : " ";
-      team.id_flag = uploadResult ? uploadResult.public_id : " ";
+      team.flag = uploadResult ? uploadResult.secure_url : null;
+      team.id_flag = uploadResult ? uploadResult.public_id : null;
     }
 
     const create = await registerATeam(team, username);
@@ -58,7 +58,7 @@ export const getTeamsController = async (id?: string, query?: any) => {
     const read = await readTeams(id, query);
     return read;
   } catch (error) {
-    return { error: "Failed to get team(s)" };
+    return { error: "Failed to get team(s)" }; //
   }
 };
 
@@ -118,6 +118,8 @@ export const updateTeamController = async (
     return { error: "Failed to update team" };
   }
 };
+
+
 
 export const deleteTeamController = async (id: string, username: string) => {
   try {

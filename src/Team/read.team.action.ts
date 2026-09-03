@@ -1,14 +1,13 @@
 import Team, { teamType } from "./team.model.js";
 
 export const readTeams = async (id?: string, query?: any) => {
-  let teams;
-  if (id) {
+  let teams:any[] = [];
+  if (id && !query) {
     teams = await Team.find({ id });
-  } else {
+  } else if(!id && query) {
     const {name, ...restQuery} = query;
     teams = await Team.find({name: {$regex: name, $options: "i"}, ...restQuery}).exec();
-  }
-  if (!id && !query) {
+  }else if (!id && !query) {
     teams = await Team.find();
   }
 
