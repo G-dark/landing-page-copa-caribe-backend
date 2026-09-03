@@ -49,9 +49,7 @@ const getTeamsHandlerWN: any = async (req: Request, res: Response) => {
 
 const createTeamHandler: any = async (req: AuthRequest, res: Response) => {
   const { username } = req.params;
-
   const { name, edition, country, founded, category } = req.body;
-
   const team: teamType = {
     name,
     edition,
@@ -64,7 +62,7 @@ const createTeamHandler: any = async (req: AuthRequest, res: Response) => {
   const date = new Date(team.founded);
   team.founded = date;
   if (req.user?.username == username) {
-    const result = await makeTeamController(team, username, req.file);
+    const result = await makeTeamController(team, username as string, req.file);
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
   } else {
@@ -75,10 +73,17 @@ const createTeamHandler: any = async (req: AuthRequest, res: Response) => {
 const deleteTeamHandler: any = async (req: AuthRequest, res: Response) => {
   const { id, username } = req.params;
   if (req.user?.rol == "Admin" || req.user?.team.includes(id as string)) {
-    const team = await getTeamsController(id as string, undefined) as teamType[]
+    const team = (await getTeamsController(
+      id as string,
+      undefined,
+    )) as teamType[];
     // delete coach and players simultaneously
-    for(let player of team[0].players!){
-      await deletePlayerController(player.toString(), team[0].edition, req.user.username);
+    for (let player of team[0].players!) {
+      await deletePlayerController(
+        player.toString(),
+        team[0].edition,
+        req.user.username,
+      );
     }
 
     const result = await deleteTeamController(id as string, username as string);
@@ -93,21 +98,17 @@ const updateTeamHandler: any = async (req: AuthRequest, res: Response) => {
   const { name, edition, country, founded, category } = req.body;
 
   const { ide, username } = req.params;
-    const team: teamType = {
+  const team: teamType = {
     name,
     edition,
     country,
     founded,
     category,
-    editedBy:username as string,
-    editedAt: new Date(Date.now())
+    editedBy: username as string,
+    editedAt: new Date(Date.now()),
   };
   if (req.user?.team.includes(ide as string) || req.user?.rol == "Admin") {
-    const result = await updateTeamController(
-      ide as string,
-      team,
-      req.file,
-    );
+    const result = await updateTeamController(ide as string, team, req.file);
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
   } else {
@@ -121,7 +122,12 @@ const addCoachHandler: any = async (req: AuthRequest, res: Response) => {
   const coach: coachInfo = { id, name };
   const { ide } = req.params;
   if (req.user?.team.includes(ide as string) || req.user?.rol == "Admin") {
-    const result = await addCoachController(ide as string, coach, req.user!.username, req.file);
+    const result = await addCoachController(
+      ide as string,
+      coach,
+      req.user!.username,
+      req.file,
+    );
     const statusCode = result.success ? 200 : 500;
     return res.status(statusCode).json(result);
   } else {
@@ -132,7 +138,11 @@ const addCoachHandler: any = async (req: AuthRequest, res: Response) => {
 const deleteCoachHandler: any = async (req: AuthRequest, res: Response) => {
   const { id, idCoach } = req.params;
   if (req.user?.team.includes(id as string) || req.user?.rol == "Admin") {
-    const result = await deleteCoachController(id as string, idCoach as string, req.user!.username);
+    const result = await deleteCoachController(
+      id as string,
+      idCoach as string,
+      req.user!.username,
+    );
     let statusCode;
     if ("success" in result!) {
       statusCode = 200;
@@ -167,7 +177,7 @@ const updateCoachHandler: any = async (req: AuthRequest, res: Response) => {
 
 teamRouter.get("/API/team/:id", getTeamsHandlerID);
 teamRouter.get("/API/teams/query", getTeamsHandlerQuery);
-teamRouter.get("/API/teams", getTeamsHandlerWN);
+teamRouter.get("/API/teamsWN", getTeamsHandlerWN);
 teamRouter.post(
   "/API/team/create/:username",
   authMiddleware,

@@ -5,7 +5,7 @@ export const makeASigned = async (signed: SignedPeopleType) => {
 
   const newSigned = new SignedPeople(signed);
 
-  if (find.length > 0) {
+  if (find.length == 0) {
     const created = await newSigned.save();
 
     if (created) {

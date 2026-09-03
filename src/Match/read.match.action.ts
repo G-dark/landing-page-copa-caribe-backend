@@ -60,5 +60,7 @@ export const transform2Match = (match: any): matchType => {
     cornersB: match.cornersB,
     faultsA: match.faultsA,
     faultsB: match.faultsB,
+    code: match.code,
+    winner: match.winner,
   };
 };

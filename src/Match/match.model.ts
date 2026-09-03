@@ -93,9 +93,13 @@ export type matchType = {
     | "Octavos de final"
     | "Cuartos de final"
     | "Semifinal"
-    | "Final";
+    | "Final"
+    | "Pre-semifinal"
+    | "Pre-cuartos";
   order: string;
   nextRound: string;
+  code: string;
+winner?: "A" | "B" | "NA";
 };
 const matchSchema = new mongoose.Schema<matchType>({
   id: { type: String, required: true, unique: true },
@@ -186,8 +190,12 @@ const matchSchema = new mongoose.Schema<matchType>({
   },
   extraTime: { type: Number, default: 0 },
   extraTime2: { type: Number, default: 0 },
-  penaltyTakersA: [{ player: { type: String }, penalty: { type: String, default: null } }],
-  penaltyTakersB: [{ player: { type: String }, penalty: { type: String, default: null } }],
+  penaltyTakersA: [
+    { player: { type: String }, penalty: { type: String, default: null } },
+  ],
+  penaltyTakersB: [
+    { player: { type: String }, penalty: { type: String, default: null } },
+  ],
   penaltyStarter: { type: String, enum: ["A", "B", "NA"], default: "NA" },
   penalties: [
     {
@@ -207,6 +215,8 @@ const matchSchema = new mongoose.Schema<matchType>({
       "Repechaje",
       "Octavos de final",
       "Cuartos de final",
+      "Pre-cuartos",
+      "Pre-semifinal",
       "Semifinal",
       "Final",
     ],
@@ -217,6 +227,8 @@ const matchSchema = new mongoose.Schema<matchType>({
   cornersB: { type: Number, default: 0 },
   faultsA: { type: Number, default: 0 },
   faultsB: { type: Number, default: 0 },
+  code: {type: String},
+  winner: { type: String, enum: ["A", "B", "NA"], default: "NA" },
 });
 
 const Match = mongoose.model<matchType>("Match", matchSchema);

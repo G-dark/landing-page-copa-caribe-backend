@@ -38,13 +38,22 @@ const readMatchHandler: any = async (req: Request, res: Response) => {
 };
 
 const readMatchByQueryHandler: any = async (req: Request, res: Response) => {
-  const { teamA, teamB } = req.query;
+  const { teamA, teamB, phase, code, order } = req.query;
   let query: any = {};
   if (teamA) {
     query.teamA = teamA;
   }
   if (teamB) {
     query.teamB = teamB;
+  }
+   if (phase) {
+    query.phase = phase;
+  }
+   if (code) {
+    query.code = code;
+  }
+  if (order) {
+    query.order = order;
   }
 
   const result = await readMatchController(undefined, query);
@@ -141,7 +150,7 @@ const addEventHandler: any = async (req: AuthRequest, res: Response) => {
         action = "Update";
       }
       if (!typo.includes("Substitution")) {
-        console.log("playersRelated", playersRelated, typo, action);
+
         for (let player of playersRelated) {
           const change = await ChangeStatsBOEventController(
             id as string,
@@ -184,7 +193,7 @@ const addEventHandler: any = async (req: AuthRequest, res: Response) => {
         typo.includes("Penales") ||
         typo.includes("Start2") && playersRelated.length == 0
       ) {
-        const change = await ChangeStatsBOEventController(
+        await ChangeStatsBOEventController(
           id as string,
           typo,
           action,
@@ -352,6 +361,7 @@ const deletePenaltyHandler: any = async (req: AuthRequest, res: Response) => {
 };
 
 matchRouter.get("/API/match/:id", readMatchHandlerByIDHandler);
+matchRouter.get("/API/matchQuery", readMatchByQueryHandler);
 matchRouter.get("/API/match", readMatchHandler);
 matchRouter.post("/API/match/create", authMiddleware, createMatchHandler);
 matchRouter.delete("/API/match/delete/:id", authMiddleware, deleteMatchHandler);

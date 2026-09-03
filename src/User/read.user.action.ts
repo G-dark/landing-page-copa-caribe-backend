@@ -3,8 +3,12 @@ import User, { UserType as userType } from "./user.model.js";
 export const readUser = async (username?: string) => {
   if (username) {
     const user = await User.find({ username });
-    user[0].password = "No password";
-    return user ? transform2User(user[0]) : { error: "User not found" };
+    if (user.length > 0) {
+      user[0].password = "No password";
+      return transform2User(user[0]);
+    } else {
+      return { error: "User not found" }
+    }
   } else {
     const users = await User.find();
     users.map((user) => {
@@ -16,7 +20,6 @@ export const readUser = async (username?: string) => {
   }
 };
 
-
 const transform2User = (user: any): userType => {
   return {
     username: user.username,
@@ -24,6 +27,6 @@ const transform2User = (user: any): userType => {
     password: user.password,
     rol: user.rol,
     team: user.team,
-    tel: user.tel
+    tel: user.tel,
   };
 };

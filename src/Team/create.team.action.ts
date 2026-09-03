@@ -1,6 +1,7 @@
 import Team, { teamType } from "./team.model.js";
 import { createID } from "../Utils/utils.js";
 import User from "../User/user.model.js";
+import mongoose from "mongoose";
 
 export const registerATeam = async (team: teamType, username: string) => {
   let registeredTeam;
@@ -16,10 +17,13 @@ export const registerATeam = async (team: teamType, username: string) => {
 
   if (registeredTeam) {
     const userUpdated = await User.find({ username });
-    userUpdated[0].team?.push(String(id));
-
-    await User.updateOne({ username }, userUpdated[0]);
-    return { success: "Team registered successfully" };
+    if (userUpdated.length > 0) {
+      userUpdated[0].team?.push(String(id));
+      await User.updateOne({ username }, userUpdated[0]);
+      return { success: "Team registered successfully" };
+    } else {
+      return { error: "That user doesn't exist" };
+    }
   } else {
     return { error: "Failed to register team" };
   }
