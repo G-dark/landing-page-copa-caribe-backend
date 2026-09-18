@@ -6,6 +6,7 @@ export type SignedPeopleType = {
   lastName: string;
   email: string;
   tel: string;
+  city: string;
   teamName: string;
   multiplesCat: boolean;
   oneCat: boolean;
@@ -29,7 +30,8 @@ const SignedPeopleSchema = new mongoose.Schema<SignedPeopleType>({
     enum: ["Inscrito", "Contactado", "Pendiente a pago", "Aceptado"],
     default: "Inscrito",
   },
-  cargo: {type: String}
+  cargo: {type: String},
+  city: {type: String}
 });
 
 export const SignedPeople = mongoose.model<SignedPeopleType>(
