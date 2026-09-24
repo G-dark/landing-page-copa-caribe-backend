@@ -56,7 +56,7 @@ export const transform2Signed = (signed: any): SignedPeopleType => {
     email: signed.email,
     teamName: signed.teamName,
     oneCat: signed.oneCat,
-    multiplesCat: signed.multipleCat,
+    multiplesCat: signed.multiplesCat,
     date: signed.date,
     fase: signed.fase,
     cargo:signed.cargo,
