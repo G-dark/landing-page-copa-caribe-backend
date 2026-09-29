@@ -21,7 +21,7 @@ export const SUPER_USER_PW =
 export const CLOUD_NAME = process.env.CLOUD_NAME;
 export const API_KEY = process.env.API_KEY;
 export const API_SECRET = process.env.API_SECRET;
-export const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || "";
+export const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 export const SENDER = process.env.SENDER || "";
 
 mongoose
