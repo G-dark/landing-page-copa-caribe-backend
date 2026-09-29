@@ -83,7 +83,7 @@ export const sendEmailController = async (
     const resend = new Resend(RESEND_API_KEY);
 
     resend.emails.send({
-      from: "Copa Caribe <no-reply@copacaribe.com>",
+      from: SENDER,
       to: email,
       subject: subject,
       html: mail,
