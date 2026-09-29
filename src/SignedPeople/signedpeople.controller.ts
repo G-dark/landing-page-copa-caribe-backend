@@ -3,8 +3,8 @@ import { updateASigned } from "./update.signedpeople.action.js";
 import { readSigned } from "./read.signedpeople.action.js";
 import { makeASigned } from "./create.signedpeople.action.js";
 import { SignedPeopleType } from "./signedpeople.model.js";
-import { SENDER, SENDGRID_API_KEY } from "../App/config.js";
-import sgmail from "@sendgrid/mail";
+import { SENDER, RESEND_API_KEY } from "../App/config.js";
+import { Resend } from "resend";
 
 export const makeSignedController = async (signed: SignedPeopleType) => {
   try {
@@ -43,8 +43,8 @@ export const sendEmailController = async (
   email: string,
   tipo: string,
   name: string,
-  user?:string,
-  pass?:string
+  user?: string,
+  pass?: string,
 ) => {
   try {
     let mail = "",
@@ -63,7 +63,7 @@ export const sendEmailController = async (
         mail = `<h1>Hola ${name}</h1> <p>Estos son los datos que necesitas diligenciar y
           mandar al siguiente correo a más tardar</p> <br/> Saludos, Copa Caribe`;
         break;
-        case "Pendiente":
+      case "Pendiente":
         subject = "Datos de pago";
         text = "Estos son los datos para el pago de la inscripción";
         mail = `<h1>Hola ${name}</h1> <p>Estos son los datos que necesitas para
@@ -72,16 +72,22 @@ export const sendEmailController = async (
       case "Introduction":
         subject = "Bienvenido a Copa Caribe";
         text = "¿Listo para participar?";
-        mail = `<h1>Hola ${name}, bienvenido a Copa Caribe</h1> <p>Esperamos y se pueden
+        mail = `<h1>Hola ${name}, bienvenido a Copa Caribe</h1> <p>Esperamos y se puedan
         cumplir tus metas en el torneo con tu(s) equipo(s)</p> <br/>usuario:${user} <br/>Contraseña:${pass}
          <br/>Con esto podrás acceder a través de nuestra pagina oficial  <br/> Saludos, Copa Caribe`;
         break;
     }
 
-    sgmail.setApiKey(SENDGRID_API_KEY);
 
-    const msg = { to: email, from: SENDER, subject, text, html: mail };
-    await sgmail.send(msg);
+
+    const resend = new Resend(RESEND_API_KEY);
+
+    resend.emails.send({
+      from: "Copa Caribe <no-reply@copacaribe.com>",
+      to: email,
+      subject: subject,
+      html: mail,
+    });
 
     return { success: "Email sent successfully!" };
   } catch (error) {
