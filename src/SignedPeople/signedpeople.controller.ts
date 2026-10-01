@@ -82,13 +82,14 @@ export const sendEmailController = async (
 
     const resend = new Resend(RESEND_API_KEY);
 
-     await resend.emails.send({
+     const { data, error } = await resend.emails.send({
       from: "Copa Caribe <onboarding@resend.dev>",
       to: email,
       subject: subject,
       html: mail,
     });
 
+    console.log("Email sent:", data, error);
 
     return { success: "Email sent successfully!" };
   } catch (error) {
