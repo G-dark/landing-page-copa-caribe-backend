@@ -3,8 +3,8 @@ import { updateASigned } from "./update.signedpeople.action.js";
 import { readSigned } from "./read.signedpeople.action.js";
 import { makeASigned } from "./create.signedpeople.action.js";
 import { SignedPeopleType } from "./signedpeople.model.js";
-import { SENDER, RESEND_API_KEY } from "../App/config.js";
-import { Resend } from "resend";
+import {GMAIL_USER, GMAIL_APP_PASSWORD } from "../App/config.js";
+import nodemailer from "nodemailer";
 
 export const makeSignedController = async (signed: SignedPeopleType) => {
   try {
@@ -80,16 +80,20 @@ export const sendEmailController = async (
 
 
 
-    const resend = new Resend(RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
-     const { data, error } = await resend.emails.send({
-      from: "Copa Caribe <onboarding@resend.dev>",
-      to: email,
-      subject: subject,
-      html: mail,
-    });
-
-    console.log("Email sent:", data, error);
+await transporter.sendMail({
+  from: process.env.GMAIL_USER,
+  to: email,
+  subject: subject,
+  html: mail,
+});
 
     return { success: "Email sent successfully!" };
   } catch (error) {
