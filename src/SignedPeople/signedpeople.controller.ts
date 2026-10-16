@@ -88,13 +88,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-await transporter.sendMail({
+const data = await transporter.sendMail({
   from: process.env.GMAIL_USER,
   to: email,
   subject: subject,
   html: mail,
 });
-
+ console.log("Email sent:", data);
+ 
     return { success: "Email sent successfully!" };
   } catch (error) {
     return { error: "Failed to send the email" };
