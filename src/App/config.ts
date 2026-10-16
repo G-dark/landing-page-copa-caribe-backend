@@ -21,8 +21,8 @@ export const SUPER_USER_PW =
 export const CLOUD_NAME = process.env.CLOUD_NAME;
 export const API_KEY = process.env.API_KEY;
 export const API_SECRET = process.env.API_SECRET;
-export const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-export const SENDER = process.env.SENDER || "";
+export const GMAIL_USER = process.env.GMAIL_USER || "";
+export const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || "";
 
 mongoose
   .connect(MONGO_URI)
